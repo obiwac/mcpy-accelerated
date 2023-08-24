@@ -37,8 +37,11 @@ def fast_is_opaque_block(self, position):
 	return not block_type.transparent
 
 def can_render_face(self, block_number, block_type, position):
-	if not fast_is_opaque_block(self.world, position):
-		if block_type.glass and fast_get_block_number(self.world, position) == block_number:
+	adj_number = fast_get_block_number(self.world, position)
+	adj_type = self.world.block_types[adj_number]
+
+	if not adj_type or adj_type.transparent:
+		if block_type.glass and adj_number == block_number:
 			return False
 
 		return True
