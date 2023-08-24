@@ -1,11 +1,10 @@
 import ctypes
 import math
+import glm
 
 import pyglet
 
 import pyglet.gl as gl
-
-import matrix
 
 import models.pig # default model
 
@@ -139,11 +138,7 @@ class Entity_type:
 
 			# compute animation transformation matrix
 
-			anim = matrix.Matrix()
-			anim.load_identity()
-
-			anim.translate(*pivot)
-
+			anim = glm.translate(glm.mat4(1), glm.vec3(*pivot))
 			kind = None
 
 			if name == "head":
@@ -175,35 +170,35 @@ class Entity_type:
 					dz = z - position[2]
 
 					theta = -rotation[0] - math.atan2(dz, dx) - math.tau / 4
-					iota = -math.atan2(dy, math.sqrt(dx ** 2 + dz ** 2))
+					iota = math.atan2(dy, math.sqrt(dx ** 2 + dz ** 2))
 
-					anim.rotate_2d(theta, 0)
-					anim.rotate_2d(0, iota)
+					anim = glm.rotate(anim, theta, glm.vec3(0, 1, 0))
+					anim = glm.rotate(anim, iota, glm.vec3(1, 0, 0))
 
 				if "leg" in kind:
 					phase = math.tau / 2 * odd
-					anim.rotate_2d(0, math.sin(age * 7 + phase) / 5 * speed)
+					anim = glm.rotate(anim, -math.sin(age * 7 + phase) / 5 * speed, glm.vec3(1, 0, 0))
 
 				if "arm" in kind:
 					theta = (-age if odd else age) * 2
 					phase = math.tau / 2 * odd
-					anim.rotate_2d(math.sin(theta + phase) / 8, math.cos(theta + phase) / 8 - math.tau / 4)
+					anim = glm.rotate(anim, math.sin(theta + phase) / 8, glm.vec3(0, 1, 0))
+					anim = glm.rotate(anim, -math.cos(theta + phase) / 8 + math.tau / 4, glm.vec3(1, 0, 0))
 
-			anim.translate(*[-x for x in pivot])
+			anim = glm.translate(anim, glm.vec3(*[-x for x in pivot]))
 
 			for i in range(0, len(vertices), 3):
-				vector = vertices[i: i + 3] + [1]
-				buffer[i * 2: i * 2 + 3] = matrix.multiply_matrix_vector(anim, vector)[:3]
+				vec = glm.vec4(*vertices[i: i + 3], 1)
+				buffer[i * 2: i * 2 + 3] = (anim * vec).xyz
 
 			# compute normals
 
 			for i in range(0, len(buffer), 24):
 				# take the cross product between two vectors we know are on the plane the face belongs to
 
-				n = matrix.cross_product(
-					[buffer[i + 0] - buffer[i + 6], buffer[i + 1] - buffer[i + 7], buffer[i + 2] - buffer[i + 8]],
-					[buffer[i + 0] - buffer[i + 12], buffer[i + 1] - buffer[i + 13], buffer[i + 2] - buffer[i + 14]]
-				)
+				u = glm.vec3(buffer[i + 0] - buffer[i + 6], buffer[i + 1] - buffer[i + 7], buffer[i + 2] - buffer[i + 8])
+				v = glm.vec3(buffer[i + 0] - buffer[i + 12], buffer[i + 1] - buffer[i + 13], buffer[i + 2] - buffer[i + 14])
+				n = glm.cross(u, v)
 
 				# each vertex of a face will have the same normal, so we can simply copy it 4 times
 

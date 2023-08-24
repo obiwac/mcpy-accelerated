@@ -1,4 +1,5 @@
 import ctypes
+import glm
 import pyglet.gl as gl
 
 class Shader_error(Exception):
@@ -65,7 +66,7 @@ class Shader:
 		return gl.glGetUniformLocation(self.program, ctypes.create_string_buffer(name))
 	
 	def uniform_matrix(self, location, matrix):
-		gl.glUniformMatrix4fv(location, 1, gl.GL_FALSE, (gl.GLfloat * 16) (*sum(matrix.data, [])))
+		gl.glUniformMatrix4fv(location, 1, gl.GL_FALSE, glm.value_ptr(matrix))
 
 	def use(self):
 		gl.glUseProgram(self.program)

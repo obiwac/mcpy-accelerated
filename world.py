@@ -1,5 +1,5 @@
 import math
-import matrix
+import glm
 
 import save
 import chunk
@@ -15,6 +15,7 @@ import pyglet.gl as gl
 
 import pyximport
 pyximport.install()
+
 import accel
 
 # import custom block models
@@ -124,9 +125,9 @@ class World:
 
 		# matrices
 
-		self.mv_matrix  = matrix.Matrix()
-		self.p_matrix   = matrix.Matrix()
-		self.mvp_matrix = matrix.Matrix()
+		self.mv_matrix  = glm.mat4()
+		self.p_matrix   = glm.mat4()
+		self.mvp_matrix = glm.mat4()
 
 		# shaders
 

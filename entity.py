@@ -1,7 +1,7 @@
 import math
+import glm
 import random
 
-import matrix
 import collider
 
 import chunk
@@ -224,17 +224,15 @@ class Entity:
 	def draw(self):
 		# compute MVP matrix
 
-		mvp = matrix.copy_matrix(self.world.mvp_matrix)
+		mvp = glm.mat4(self.world.mvp_matrix)
+		mvp = glm.translate(mvp, glm.vec3(*self.position))
 
-		mvp.translate(*self.position)
-		mvp.rotate_2d(self.rotation[0], 0)
+		mvp = glm.rotate(mvp, self.rotation[0], glm.vec3(0, 1, 0))
 
 		# compute inverse transformation matrix
 
-		inverse = matrix.Matrix()
-		inverse.load_identity()
-
-		inverse.rotate_2d(-self.rotation[0], 0)
+		inverse = glm.mat4(1)
+		inverse = glm.rotate(inverse, -self.rotation[0], glm.vec3(0, 1, 0))
 
 		# actually draw entity
 

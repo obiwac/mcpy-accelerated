@@ -1,4 +1,5 @@
 import math
+import glm
 import entity
 
 WALKING_SPEED = 4.317
@@ -49,17 +50,16 @@ class Player(entity.Entity):
 	def update_matrices(self):
 		# create projection matrix
 
-		self.world.p_matrix.load_identity()
-
-		self.world.p_matrix.perspective(
-			90 + 10 * (self.speed - WALKING_SPEED) / (SPRINTING_SPEED - WALKING_SPEED),
+		self.world.p_matrix = glm.perspective(
+			glm.radians(90 + 10 * (self.speed - WALKING_SPEED) / (SPRINTING_SPEED - WALKING_SPEED)),
 			float(self.view_width) / self.view_height, 0.1, 500)
 
 		# create modelview matrix
 
-		self.world.mv_matrix.load_identity()
-		self.world.mv_matrix.rotate_2d(self.rotation[0] + math.tau / 4, self.rotation[1])
-		self.world.mv_matrix.translate(-self.position[0], -self.position[1] - self.eyelevel, -self.position[2])
+		self.world.mv_matrix = glm.mat4(1)
+		self.world.mv_matrix = glm.rotate(self.world.mv_matrix, self.rotation[1], glm.vec3(-1, 0, 0))
+		self.world.mv_matrix = glm.rotate(self.world.mv_matrix, self.rotation[0] + math.tau / 4, glm.vec3(0, 1, 0))
+		self.world.mv_matrix = glm.translate(self.world.mv_matrix, -glm.vec3(*self.position) - glm.vec3(0, self.eyelevel, 0))
 
 		# modelviewprojection matrix
 
