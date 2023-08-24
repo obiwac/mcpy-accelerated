@@ -11,12 +11,15 @@ def fast_get_block_number(self, position):
 	if not chunk_position in self.chunks:
 		return 0
 
-	pos = (
-		int(x % chunk.CHUNK_WIDTH),
-		int(y % chunk.CHUNK_HEIGHT),
-		int(z % chunk.CHUNK_LENGTH))
+	x = int(x % chunk.CHUNK_WIDTH)
+	y = int(y % chunk.CHUNK_HEIGHT)
+	z = int(z % chunk.CHUNK_LENGTH)
 
-	block_number = self.chunks[chunk_position].get_block(*pos)
+	block_number = self.chunks[chunk_position].blocks[
+		x * chunk.CHUNK_LENGTH * chunk.CHUNK_HEIGHT +
+		z * chunk.CHUNK_HEIGHT +
+		y]
+
 	return block_number
 
 def fast_is_opaque_block(self, position):
