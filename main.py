@@ -8,11 +8,9 @@ pyglet.options["debug_gl"] = False
 
 import pyglet.gl as gl
 
-import player
 import mob
-
+import player
 import world
-
 import hit
 
 class Window(pyglet.window.Window):
