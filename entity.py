@@ -137,12 +137,13 @@ class Entity:
 		cx, cy, cz = [int(p + v) for p, v in zip(self.position, adjusted_velocity)]
 
 		potential_collisions = []
+		chunks = self.world.chunks
 
 		for i in range(x - step_x * (steps_xz + 1), cx + step_x * (steps_xz + 2), step_x):
 			for j in range(y - step_y * (steps_y + 2), cy + step_y * (steps_y + 3), step_y):
 				for k in range(z - step_z * (steps_xz + 1), cz + step_z * (steps_xz + 2), step_z):
 					pos = (i, j, k)
-					num = self.world.get_block_number(pos)
+					num = accel.fast_get_block_number(chunks, pos)
 
 					if not num:
 						continue
