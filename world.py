@@ -156,9 +156,9 @@ class World:
 		x, y, z = position
 
 		return (
-			math.floor(x / chunk.CHUNK_WIDTH),
-			math.floor(y / chunk.CHUNK_HEIGHT),
-			math.floor(z / chunk.CHUNK_LENGTH))
+			x // chunk.CHUNK_WIDTH,
+			y // chunk.CHUNK_HEIGHT,
+			z // chunk.CHUNK_LENGTH)
 
 	def get_local_position(self, position):
 		x, y, z = position
