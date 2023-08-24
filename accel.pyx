@@ -2,32 +2,33 @@
 
 import chunk
 
+CHUNK_WIDTH = 16
+CHUNK_HEIGHT = 128
+CHUNK_LENGTH = 16
+
 def fast_get_block_number(self, position):
 	x, y, z = position
 
 	chunk_position = (
-		x // chunk.CHUNK_WIDTH,
-		y // chunk.CHUNK_HEIGHT,
-		z // chunk.CHUNK_LENGTH)
+		x // CHUNK_WIDTH,
+		y // CHUNK_HEIGHT,
+		z // CHUNK_LENGTH)
 
 	if not chunk_position in self.chunks:
 		return 0
 
-	x = int(x % chunk.CHUNK_WIDTH)
-	y = int(y % chunk.CHUNK_HEIGHT)
-	z = int(z % chunk.CHUNK_LENGTH)
+	x = x % CHUNK_WIDTH
+	y = y % CHUNK_HEIGHT
+	z = z % CHUNK_LENGTH
 
 	block_number = self.chunks[chunk_position].blocks[
-		x * chunk.CHUNK_LENGTH * chunk.CHUNK_HEIGHT +
-		z * chunk.CHUNK_HEIGHT +
+		x * CHUNK_LENGTH * CHUNK_HEIGHT +
+		z * CHUNK_HEIGHT +
 		y]
 
 	return block_number
 
 def fast_is_opaque_block(self, position):
-	# get block type and check if it's opaque or not
-	# air counts as a transparent block, so test for that too
-
 	block_type = self.block_types[fast_get_block_number(self, position)]
 
 	if not block_type:

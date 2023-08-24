@@ -173,6 +173,6 @@ from pyinstrument import Profiler
 if __name__ == "__main__":
 	with Profiler(interval=0.01) as profiler:
 		game = Game()
-		game.run()
 
 	profiler.open_in_browser()
+	game.run()
