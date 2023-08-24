@@ -1,3 +1,5 @@
+# cython: language_level=3
+
 import chunk
 
 def fast_get_block_number(self, position):
