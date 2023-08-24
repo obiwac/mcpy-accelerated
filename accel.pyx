@@ -36,9 +36,9 @@ def fast_is_opaque_block(self, position):
 
 	return not block_type.transparent
 
-def can_render_face(self, block_number, block_type, position):
-	adj_number = fast_get_block_number(self.world.chunks, position)
-	adj_type = self.world.block_types[adj_number]
+def can_render_face(chunks, block_types, block_number, block_type, position):
+	adj_number = fast_get_block_number(chunks, position)
+	adj_type = block_types[adj_number]
 
 	if not adj_type or adj_type.transparent:
 		if block_type.glass and adj_number == block_number:

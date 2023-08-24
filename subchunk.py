@@ -60,6 +60,9 @@ class Subchunk:
 			self.mesh_tex_coords.extend(block_type.tex_coords[face])
 			self.mesh_shading_values.extend(block_type.shading_values[face])
 
+		chunks = self.world.chunks
+		block_types = self.world.block_types
+
 		for local_x in range(SUBCHUNK_WIDTH):
 			for local_y in range(SUBCHUNK_HEIGHT):
 				for local_z in range(SUBCHUNK_LENGTH):
@@ -82,12 +85,12 @@ class Subchunk:
 						# since the vast majority of blocks are probably anyway going to be cubes, this won't impact performance all that much; the amount of useless faces drawn is going to be minimal
 
 						if block_type.is_cube:
-							if accel.can_render_face(self, block_number, block_type, (x + 1, y, z)): add_face(0)
-							if accel.can_render_face(self, block_number, block_type, (x - 1, y, z)): add_face(1)
-							if accel.can_render_face(self, block_number, block_type, (x, y + 1, z)): add_face(2)
-							if accel.can_render_face(self, block_number, block_type, (x, y - 1, z)): add_face(3)
-							if accel.can_render_face(self, block_number, block_type, (x, y, z + 1)): add_face(4)
-							if accel.can_render_face(self, block_number, block_type, (x, y, z - 1)): add_face(5)
+							if accel.can_render_face(chunks, block_types, block_number, block_type, (x + 1, y, z)): add_face(0)
+							if accel.can_render_face(chunks, block_types, block_number, block_type, (x - 1, y, z)): add_face(1)
+							if accel.can_render_face(chunks, block_types, block_number, block_type, (x, y + 1, z)): add_face(2)
+							if accel.can_render_face(chunks, block_types, block_number, block_type, (x, y - 1, z)): add_face(3)
+							if accel.can_render_face(chunks, block_types, block_number, block_type, (x, y, z + 1)): add_face(4)
+							if accel.can_render_face(chunks, block_types, block_number, block_type, (x, y, z - 1)): add_face(5)
 						
 						else:
 							for i in range(len(block_type.vertex_positions)):
