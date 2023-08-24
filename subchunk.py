@@ -76,27 +76,18 @@ class Subchunk:
 							self.position[0] + local_x,
 							self.position[1] + local_y,
 							self.position[2] + local_z)
-						
-						def can_render_face(position):
-							if not accel.fast_is_opaque_block(self.world, position):
-								if block_type.glass and self.world.get_block_number(position) == block_number:
-									return False
-								
-								return True
-							
-							return False
 
 						# if block is cube, we want it to check neighbouring blocks so that we don't uselessly render faces
 						# if block isn't a cube, we just want to render all faces, regardless of neighbouring blocks
 						# since the vast majority of blocks are probably anyway going to be cubes, this won't impact performance all that much; the amount of useless faces drawn is going to be minimal
 
 						if block_type.is_cube:
-							if can_render_face((x + 1, y, z)): add_face(0)
-							if can_render_face((x - 1, y, z)): add_face(1)
-							if can_render_face((x, y + 1, z)): add_face(2)
-							if can_render_face((x, y - 1, z)): add_face(3)
-							if can_render_face((x, y, z + 1)): add_face(4)
-							if can_render_face((x, y, z - 1)): add_face(5)
+							if accel.can_render_face(self, block_number, block_type, (x + 1, y, z)): add_face(0)
+							if accel.can_render_face(self, block_number, block_type, (x - 1, y, z)): add_face(1)
+							if accel.can_render_face(self, block_number, block_type, (x, y + 1, z)): add_face(2)
+							if accel.can_render_face(self, block_number, block_type, (x, y - 1, z)): add_face(3)
+							if accel.can_render_face(self, block_number, block_type, (x, y, z + 1)): add_face(4)
+							if accel.can_render_face(self, block_number, block_type, (x, y, z - 1)): add_face(5)
 						
 						else:
 							for i in range(len(block_type.vertex_positions)):
