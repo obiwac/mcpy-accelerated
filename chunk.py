@@ -3,7 +3,7 @@ import math
 
 import pyglet.gl as gl
 
-import subchunk 
+import subchunk
 
 CHUNK_WIDTH = 16
 CHUNK_HEIGHT = 128
@@ -21,7 +21,7 @@ class Chunk:
 			self.chunk_position[1] * CHUNK_HEIGHT,
 			self.chunk_position[2] * CHUNK_LENGTH)
 		
-		self.blocks = [0 for z in range(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LENGTH)]
+		self.blocks = [0 for _ in range(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LENGTH)]
 		self.subchunks = {}
 		
 		for x in range(int(CHUNK_WIDTH / subchunk.SUBCHUNK_WIDTH)):
