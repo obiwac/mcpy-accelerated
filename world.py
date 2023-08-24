@@ -9,7 +9,6 @@ import block_type
 import texture_manager
 
 import player
-import entity_type
 
 import pyglet.gl as gl
 
@@ -17,6 +16,7 @@ import pyximport
 pyximport.install()
 
 import accel
+import entity_type
 
 # import custom block models
 
