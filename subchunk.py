@@ -1,3 +1,7 @@
+import pyximport
+pyximport.install()
+import accel
+
 SUBCHUNK_WIDTH  = 4
 SUBCHUNK_HEIGHT = 4
 SUBCHUNK_LENGTH = 4
@@ -74,7 +78,7 @@ class Subchunk:
 							self.position[2] + local_z)
 						
 						def can_render_face(position):
-							if not self.world.is_opaque_block(position):
+							if not accel.fast_is_opaque_block(self.world, position):
 								if block_type.glass and self.world.get_block_number(position) == block_number:
 									return False
 								
