@@ -6,7 +6,7 @@ CHUNK_WIDTH = 16
 CHUNK_HEIGHT = 128
 CHUNK_LENGTH = 16
 
-def fast_get_block_number(self, position):
+def fast_get_block_number(chunks, position):
 	x, y, z = position
 
 	chunk_position = (
@@ -14,14 +14,14 @@ def fast_get_block_number(self, position):
 		y // CHUNK_HEIGHT,
 		z // CHUNK_LENGTH)
 
-	if not chunk_position in self.chunks:
+	if not chunk_position in chunks:
 		return 0
 
 	x = x % CHUNK_WIDTH
 	y = y % CHUNK_HEIGHT
 	z = z % CHUNK_LENGTH
 
-	block_number = self.chunks[chunk_position].blocks[
+	block_number = chunks[chunk_position].blocks[
 		x * CHUNK_LENGTH * CHUNK_HEIGHT +
 		z * CHUNK_HEIGHT +
 		y]
@@ -37,7 +37,7 @@ def fast_is_opaque_block(self, position):
 	return not block_type.transparent
 
 def can_render_face(self, block_number, block_type, position):
-	adj_number = fast_get_block_number(self.world, position)
+	adj_number = fast_get_block_number(self.world.chunks, position)
 	adj_type = self.world.block_types[adj_number]
 
 	if not adj_type or adj_type.transparent:
