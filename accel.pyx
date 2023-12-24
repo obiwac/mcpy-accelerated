@@ -74,6 +74,7 @@ def fast_update_mesh(self):
 
 	def add_face(face):
 		vertex_positions = block_type.vertex_positions[face].copy()
+		cdef int i
 
 		for i in range(4):
 			vertex_positions[i * 3 + 0] += x
@@ -82,7 +83,7 @@ def fast_update_mesh(self):
 		
 		self.mesh_vertex_positions.extend(vertex_positions)
 
-		indices = [0, 1, 2, 0, 2, 3]
+		cdef int[6] indices = [0, 1, 2, 0, 2, 3]
 
 		for i in range(6):
 			indices[i] += self.mesh_index_counter
