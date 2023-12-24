@@ -1,8 +1,6 @@
 import math
 import glm
 
-import pyximport
-pyximport.install()
 import entity
 
 WALKING_SPEED = 4.317

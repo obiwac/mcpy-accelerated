@@ -1,8 +1,6 @@
 import random
 import math
 
-import pyximport
-pyximport.install()
 import entity
 
 class Mob(entity.Entity):

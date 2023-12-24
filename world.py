@@ -12,9 +12,6 @@ import player
 
 import pyglet.gl as gl
 
-import pyximport
-pyximport.install()
-
 import accel
 import entity_type
 

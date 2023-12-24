@@ -169,9 +169,8 @@ class Game:
 from pyinstrument import Profiler
 
 if __name__ == "__main__":
-	game = Game()
-
 	with Profiler(interval=0.01) as profiler:
-		game.run()
+		game = Game()
 
 	profiler.open_in_browser()
+	game.run()

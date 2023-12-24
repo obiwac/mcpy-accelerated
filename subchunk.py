@@ -1,5 +1,3 @@
-import pyximport
-pyximport.install()
 import accel
 
 SUBCHUNK_WIDTH  = 4

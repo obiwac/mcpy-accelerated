@@ -2,8 +2,6 @@ import math
 import glm
 import random
 
-import pyximport
-pyximport.install()
 import collider
 import accel
 
