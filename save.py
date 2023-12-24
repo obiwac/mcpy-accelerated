@@ -115,8 +115,8 @@ class Save:
 		# 	for y in range(-15, 16):
 		# 		self.load_chunk((x, 0, y))
 
-		for x in range(-8, 8):
-			for y in range(-8, 8):
+		for x in range(-4, 4):
+			for y in range(-4, 4):
 				self.load_chunk((x, 0, y))
 
 		for x in range(-2, 2):

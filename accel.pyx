@@ -60,9 +60,9 @@ cdef can_render_face(parent_blocks, chunks, block_types, block_number, block_typ
 
 	return False
 
-SUBCHUNK_WIDTH  = 4
-SUBCHUNK_HEIGHT = 4
-SUBCHUNK_LENGTH = 4
+cdef int SUBCHUNK_WIDTH  = 4
+cdef int SUBCHUNK_HEIGHT = 4
+cdef int SUBCHUNK_LENGTH = 4
 
 def fast_update_mesh(self):
 	self.mesh_vertex_positions = []
@@ -97,26 +97,36 @@ def fast_update_mesh(self):
 	block_types = self.world.block_types
 	parent_blocks = self.parent.blocks
 
+	cdef int slx = self.local_position[0]
+	cdef int sly = self.local_position[1]
+	cdef int slz = self.local_position[2]
+
+	cdef int sx = self.position[0]
+	cdef int sy = self.position[1]
+	cdef int sz = self.position[2]
+
 	cdef int x, y, z
+	cdef int parent_lx, parent_ly, parent_lz
+	cdef int local_x, local_y, local_z
 
 	for local_x in range(SUBCHUNK_WIDTH):
 		for local_y in range(SUBCHUNK_HEIGHT):
 			for local_z in range(SUBCHUNK_LENGTH):
-				parent_lx = self.local_position[0] + local_x
-				parent_ly = self.local_position[1] + local_y
-				parent_lz = self.local_position[2] + local_z
+				parent_lx = slx + local_x
+				parent_ly = sly + local_y
+				parent_lz = slz + local_z
 
-				block_number = self.parent.blocks[
+				block_number = parent_blocks[
 					parent_lx * CHUNK_LENGTH * CHUNK_HEIGHT +
 					parent_lz * CHUNK_HEIGHT +
 					parent_ly]
 
 				if block_number:
-					block_type = self.world.block_types[block_number]
+					block_type = block_types[block_number]
 
-					x = self.position[0] + local_x
-					y = self.position[1] + local_y
-					z = self.position[2] + local_z
+					x = sx + local_x
+					y = sy + local_y
+					z = sz + local_z
 
 					# if block is cube, we want it to check neighbouring blocks so that we don't uselessly render faces
 					# if block isn't a cube, we just want to render all faces, regardless of neighbouring blocks
