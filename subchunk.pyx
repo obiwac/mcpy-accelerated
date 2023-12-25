@@ -12,39 +12,26 @@ SUBCHUNK_WIDTH = C_SUBCHUNK_WIDTH
 SUBCHUNK_HEIGHT = C_SUBCHUNK_HEIGHT
 SUBCHUNK_LENGTH = C_SUBCHUNK_LENGTH
 
-def get_block_number(chunks, position):
-	x, y, z = position
-
-	chunk_position = (
-		x // CHUNK_WIDTH,
-		y // CHUNK_HEIGHT,
-		z // CHUNK_LENGTH)
-
-	if not chunk_position in chunks:
-		return 0
-
-	x = x % CHUNK_WIDTH
-	y = y % CHUNK_HEIGHT
-	z = z % CHUNK_LENGTH
-
-	block_number = chunks[chunk_position].blocks[
-		x * CHUNK_LENGTH * CHUNK_HEIGHT +
-		z * CHUNK_HEIGHT +
-		y]
-
-	return block_number
-
 cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, block_type, int x_, int y_, int z_):
 	cdef int x = x_ % CHUNK_WIDTH
 	cdef int y = y_ % CHUNK_HEIGHT
 	cdef int z = z_ % CHUNK_LENGTH
 
-	cdef int adj_number
+	cdef int adj_number = 0
 
 	# get_block_number is relatively slow, but we can just index the chunk directly if we know we're not on the edges of it
 
 	if x == 0 or x == CHUNK_WIDTH - 1 or y == 0 or y == CHUNK_HEIGHT - 1 or z == 0 or z == CHUNK_LENGTH - 1:
-		adj_number = get_block_number(chunks, (x_, y_, z_))
+		chunk_position = (
+			x_ // CHUNK_WIDTH,
+			y_ // CHUNK_HEIGHT,
+			z_ // CHUNK_LENGTH)
+
+		if chunk_position in chunks:
+			adj_number = chunks[chunk_position].blocks[
+				x * CHUNK_LENGTH * CHUNK_HEIGHT +
+				z * CHUNK_HEIGHT +
+				y]
 
 	else:
 		adj_number = parent_blocks[
