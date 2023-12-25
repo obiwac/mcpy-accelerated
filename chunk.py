@@ -3,11 +3,13 @@ import math
 
 import pyglet.gl as gl
 
-import subchunk
+# define these first because subchunk depends on them
 
 CHUNK_WIDTH = 16
 CHUNK_HEIGHT = 128
 CHUNK_LENGTH = 16
+
+import subchunk
 
 class Chunk:
 	def __init__(self, world, chunk_position):
