@@ -28,14 +28,6 @@ def fast_get_block_number(chunks, position):
 
 	return block_number
 
-def fast_is_opaque_block(self, position):
-	block_type = self.block_types[fast_get_block_number(self, position)]
-
-	if not block_type:
-		return False
-
-	return not block_type.transparent
-
 cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, block_type, int x_, int y_, int z_):
 	cdef int x = x_ % CHUNK_WIDTH
 	cdef int y = y_ % CHUNK_HEIGHT
