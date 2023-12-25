@@ -1,4 +1,4 @@
-import accel
+import fast
 
 SUBCHUNK_WIDTH  = 4
 SUBCHUNK_HEIGHT = 4
@@ -28,4 +28,4 @@ class Subchunk:
 		self.mesh_indices = []
 	
 	def update_mesh(self):
-		accel.fast_update_mesh(self)
+		fast.subchunk_update_mesh(self)

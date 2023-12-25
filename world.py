@@ -12,7 +12,6 @@ import player
 
 import pyglet.gl as gl
 
-import accel
 import entity_type
 
 # import custom block models

@@ -3,7 +3,7 @@ import glm
 import random
 
 import collider
-import accel
+import fast
 
 import chunk
 
@@ -140,7 +140,7 @@ class Entity:
 			for j in range(y - step_y * (steps_y + 2), cy + step_y * (steps_y + 3), step_y):
 				for k in range(z - step_z * (steps_xz + 1), cz + step_z * (steps_xz + 2), step_z):
 					pos = (i, j, k)
-					num = accel.fast_get_block_number(self.world.chunks, pos)
+					num = fast.get_block_number(self.world.chunks, pos)
 
 					if not num:
 						continue
