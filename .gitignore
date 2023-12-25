@@ -1,3 +1,8 @@
 __pycache__
 *.pyc
 *.sw[nop]
+*.so
+*.cache
+*.c
+*.html
+*.core
