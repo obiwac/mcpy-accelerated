@@ -31,27 +31,18 @@ class Chunk:
 
 		# mesh variables
 
-		self.mesh_vertex_positions = []
-		self.mesh_tex_coords = []
-		self.mesh_shading_values = []
-
+		self.mesh_data = []
 		self.mesh_index_counter = 0
 		self.mesh_indices = []
 
-		# create VAO and VBO's
+		# create VAO, VBO, and IBO
 
 		self.vao = gl.GLuint(0)
 		gl.glGenVertexArrays(1, self.vao)
 		gl.glBindVertexArray(self.vao)
 
-		self.vertex_position_vbo = gl.GLuint(0)
-		gl.glGenBuffers(1, self.vertex_position_vbo)
-
-		self.tex_coord_vbo = gl.GLuint(0)
-		gl.glGenBuffers(1, self.tex_coord_vbo)
-
-		self.shading_values_vbo = gl.GLuint(0)
-		gl.glGenBuffers(1, self.shading_values_vbo)
+		self.vbo = gl.GLuint(0)
+		gl.glGenBuffers(1, self.vbo)
 
 		self.ibo = gl.GLuint(0)
 		gl.glGenBuffers(1, self.ibo)
@@ -104,22 +95,16 @@ class Chunk:
 	def update_mesh(self):
 		# combine all the small subchunk meshes into one big chunk mesh
 
-		self.mesh_vertex_positions = []
-		self.mesh_tex_coords = []
-		self.mesh_shading_values = []
-
+		self.mesh_data = []
 		self.mesh_index_counter = 0
 		self.mesh_indices = []
 
 		for subchunk_position in self.subchunks:
 			subchunk = self.subchunks[subchunk_position]
 
-			self.mesh_vertex_positions.extend(subchunk.mesh_vertex_positions)
-			self.mesh_tex_coords.extend(subchunk.mesh_tex_coords)
-			self.mesh_shading_values.extend(subchunk.mesh_shading_values)
+			self.mesh_data.extend(subchunk.mesh_data)
 
 			mesh_indices = [index + self.mesh_index_counter for index in subchunk.mesh_indices]
-			
 			self.mesh_indices.extend(mesh_indices)
 			self.mesh_index_counter += subchunk.mesh_index_counter
 		
@@ -129,10 +114,7 @@ class Chunk:
 		self.mesh_indices_length = len(self.mesh_indices)
 		self.send_mesh_data_to_gpu()
 		
-		del self.mesh_vertex_positions
-		del self.mesh_tex_coords
-		del self.mesh_shading_values
-
+		del self.mesh_data
 		del self.mesh_indices
 	
 	def send_mesh_data_to_gpu(self): # pass mesh data to gpu
@@ -141,34 +123,21 @@ class Chunk:
 
 		gl.glBindVertexArray(self.vao)
 
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vertex_position_vbo)
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbo)
 		gl.glBufferData(
 			gl.GL_ARRAY_BUFFER,
-			ctypes.sizeof(gl.GLfloat * len(self.mesh_vertex_positions)),
-			(gl.GLfloat * len(self.mesh_vertex_positions)) (*self.mesh_vertex_positions),
+			ctypes.sizeof(gl.GLfloat * len(self.mesh_data)),
+			(gl.GLfloat * len(self.mesh_data)) (*self.mesh_data),
 			gl.GL_STATIC_DRAW)
+
+		f = ctypes.sizeof(gl.GLfloat)
 		
-		gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
+		gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 7 * f, 0 * f)
+		gl.glVertexAttribPointer(1, 3, gl.GL_FLOAT, gl.GL_FALSE, 7 * f, 3 * f)
+		gl.glVertexAttribPointer(2, 1, gl.GL_FLOAT, gl.GL_FALSE, 7 * f, 6 * f)
+
 		gl.glEnableVertexAttribArray(0)
-
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.tex_coord_vbo)
-		gl.glBufferData(
-			gl.GL_ARRAY_BUFFER,
-			ctypes.sizeof(gl.GLfloat * len(self.mesh_tex_coords)),
-			(gl.GLfloat * len(self.mesh_tex_coords)) (*self.mesh_tex_coords),
-			gl.GL_STATIC_DRAW)
-		
-		gl.glVertexAttribPointer(1, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
 		gl.glEnableVertexAttribArray(1)
-
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.shading_values_vbo)
-		gl.glBufferData(
-			gl.GL_ARRAY_BUFFER,
-			ctypes.sizeof(gl.GLfloat * len(self.mesh_shading_values)),
-			(gl.GLfloat * len(self.mesh_shading_values)) (*self.mesh_shading_values),
-			gl.GL_STATIC_DRAW)
-		
-		gl.glVertexAttribPointer(2, 1, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
 		gl.glEnableVertexAttribArray(2)
 
 		gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.ibo)

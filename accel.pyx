@@ -36,10 +36,14 @@ def fast_is_opaque_block(self, position):
 
 	return not block_type.transparent
 
-cdef can_render_face(parent_blocks, chunks, block_types, block_number, block_type, int x_, int y_, int z_):
+cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, block_type, int x_, int y_, int z_):
 	cdef int x = x_ % CHUNK_WIDTH
 	cdef int y = y_ % CHUNK_HEIGHT
 	cdef int z = z_ % CHUNK_LENGTH
+
+	cdef int adj_number
+
+	# fast_get_block_number is relatively slow, but we can just index the chunk directly if we know we're not on the edges of it
 
 	if x == 0 or x == CHUNK_WIDTH - 1 or y == 0 or y == CHUNK_HEIGHT - 1 or z == 0 or z == CHUNK_LENGTH - 1:
 		adj_number = fast_get_block_number(chunks, (x_, y_, z_))
@@ -52,8 +56,8 @@ cdef can_render_face(parent_blocks, chunks, block_types, block_number, block_typ
 
 	adj_type = block_types[adj_number]
 
-	if not adj_type or adj_type.transparent:
-		if block_type.glass and adj_number == block_number:
+	if not adj_type or adj_type.transparent: # TODO getting transparent attribute of adjacent block incurs a lot of overhead
+		if block_type.glass and adj_number == block_number: # rich compare between adj_number and block_number prevented
 			return False
 
 		return True
@@ -65,23 +69,30 @@ cdef int SUBCHUNK_HEIGHT = 4
 cdef int SUBCHUNK_LENGTH = 4
 
 def fast_update_mesh(self):
-	self.mesh_vertex_positions = []
-	self.mesh_tex_coords = []
-	self.mesh_shading_values = []
-
+	self.mesh_data = []
 	self.mesh_index_counter = 0
 	self.mesh_indices = []
 
 	def add_face(face):
-		vertex_positions = block_type.vertex_positions[face].copy()
+		vertex_positions = block_type.vertex_positions[face]
+		tex_coords = block_type.tex_coords[face]
+		shading_values = block_type.shading_values[face]
+
+		data = [0.] * (4 * 7)
 		cdef int i
 
 		for i in range(4):
-			vertex_positions[i * 3 + 0] += x
-			vertex_positions[i * 3 + 1] += y
-			vertex_positions[i * 3 + 2] += z
+			data[i * 7 + 0] = vertex_positions[i * 3 + 0] + x
+			data[i * 7 + 1] = vertex_positions[i * 3 + 1] + y
+			data[i * 7 + 2] = vertex_positions[i * 3 + 2] + z
+
+			data[i * 7 + 3] = tex_coords[i * 3 + 0]
+			data[i * 7 + 4] = tex_coords[i * 3 + 1]
+			data[i * 7 + 5] = tex_coords[i * 3 + 2]
+
+			data[i * 7 + 6] = shading_values[i]
 		
-		self.mesh_vertex_positions.extend(vertex_positions)
+		self.mesh_data.extend(data)
 
 		cdef int[6] indices = [0, 1, 2, 0, 2, 3]
 
@@ -90,9 +101,6 @@ def fast_update_mesh(self):
 		
 		self.mesh_indices.extend(indices)
 		self.mesh_index_counter += 4
-
-		self.mesh_tex_coords.extend(block_type.tex_coords[face])
-		self.mesh_shading_values.extend(block_type.shading_values[face])
 
 	chunks = self.world.chunks
 	block_types = self.world.block_types
@@ -108,6 +116,7 @@ def fast_update_mesh(self):
 
 	cdef int x, y, z
 	cdef int parent_lx, parent_ly, parent_lz
+	cdef int block_number
 	cdef int local_x, local_y, local_z
 
 	for local_x in range(SUBCHUNK_WIDTH):

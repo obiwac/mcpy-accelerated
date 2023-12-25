@@ -23,10 +23,7 @@ class Subchunk:
 
 		# mesh variables
 
-		self.mesh_vertex_positions = []
-		self.mesh_tex_coords = []
-		self.mesh_shading_values = []
-
+		self.mesh_data = []
 		self.mesh_index_counter = 0
 		self.mesh_indices = []
 	
