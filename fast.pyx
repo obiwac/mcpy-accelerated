@@ -1,12 +1,15 @@
-# cython: language_level=3
-
 import chunk
+import subchunk
 
-cdef int CHUNK_WIDTH = 16
-cdef int CHUNK_HEIGHT = 128
-cdef int CHUNK_LENGTH = 16
+cdef int CHUNK_WIDTH = chunk.CHUNK_WIDTH
+cdef int CHUNK_HEIGHT = chunk.CHUNK_HEIGHT
+cdef int CHUNK_LENGTH = chunk.CHUNK_LENGTH
 
-def fast_get_block_number(chunks, position):
+cdef int SUBCHUNK_WIDTH = subchunk.SUBCHUNK_WIDTH
+cdef int SUBCHUNK_HEIGHT = subchunk.SUBCHUNK_HEIGHT
+cdef int SUBCHUNK_LENGTH = subchunk.SUBCHUNK_LENGTH
+
+def get_block_number(chunks, position):
 	x, y, z = position
 
 	chunk_position = (
@@ -35,10 +38,10 @@ cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, 
 
 	cdef int adj_number
 
-	# fast_get_block_number is relatively slow, but we can just index the chunk directly if we know we're not on the edges of it
+	# get_block_number is relatively slow, but we can just index the chunk directly if we know we're not on the edges of it
 
 	if x == 0 or x == CHUNK_WIDTH - 1 or y == 0 or y == CHUNK_HEIGHT - 1 or z == 0 or z == CHUNK_LENGTH - 1:
-		adj_number = fast_get_block_number(chunks, (x_, y_, z_))
+		adj_number = get_block_number(chunks, (x_, y_, z_))
 
 	else:
 		adj_number = parent_blocks[
@@ -56,11 +59,7 @@ cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, 
 
 	return False
 
-cdef int SUBCHUNK_WIDTH  = 4
-cdef int SUBCHUNK_HEIGHT = 4
-cdef int SUBCHUNK_LENGTH = 4
-
-def fast_update_mesh(self):
+def subchunk_update_mesh(self):
 	self.mesh_data = []
 	self.mesh_index_counter = 0
 	self.mesh_indices = []
