@@ -166,11 +166,11 @@ class Game:
 	def run(self):
 		pyglet.app.run()
 
-from pyinstrument import Profiler
+import cProfile
 
 if __name__ == "__main__":
-	with Profiler(interval=0.01) as profiler:
+	with cProfile.Profile() as profiler:
 		game = Game()
+		profiler.dump_stats("stats.prof")
 
-	profiler.open_in_browser()
 	game.run()
