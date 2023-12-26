@@ -5,26 +5,14 @@ import math
 import pyglet.gl as gl
 
 from libc.stdlib cimport malloc, free
+from libc.stdint cimport uint8_t
+from chunk_common cimport CChunk, CSubchunk
+from chunk_common import CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_LENGTH
+from chunk_common import SUBCHUNK_WIDTH, SUBCHUNK_HEIGHT, SUBCHUNK_LENGTH
 
 # define these first because subchunk depends on them
 
-CHUNK_WIDTH = 16
-CHUNK_HEIGHT = 128
-CHUNK_LENGTH = 16
-
 import subchunk
-from subchunk cimport CSubchunk
-
-cdef class CChunk:
-	cdef size_t data_count
-	cdef float* data
-
-	cdef size_t index_count
-	cdef int* indices
-
-	@property
-	def index_count(self):
-		return self.index_count
 
 cdef send_mesh_data_to_gpu(self): # pass mesh data to gpu
 	cdef CChunk c = self.c
@@ -114,12 +102,11 @@ class Chunk:
 			self.chunk_position[1] * CHUNK_HEIGHT,
 			self.chunk_position[2] * CHUNK_LENGTH)
 		
-		self.blocks = [0 for _ in range(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LENGTH)]
 		self.subchunks = {}
 		
-		for x in range(int(CHUNK_WIDTH / subchunk.SUBCHUNK_WIDTH)):
-			for y in range(int(CHUNK_HEIGHT / subchunk.SUBCHUNK_HEIGHT)):
-				for z in range(int(CHUNK_LENGTH / subchunk.SUBCHUNK_LENGTH)):
+		for x in range(int(CHUNK_WIDTH / SUBCHUNK_WIDTH)):
+			for y in range(int(CHUNK_HEIGHT / SUBCHUNK_HEIGHT)):
+				for z in range(int(CHUNK_LENGTH / SUBCHUNK_LENGTH)):
 					self.subchunks[(x, y, z)] = subchunk.Subchunk(self, (x, y, z))
 
 		self.c = CChunk()
@@ -137,16 +124,19 @@ class Chunk:
 		gl.glGenBuffers(1, self.ibo)
 
 	def get_block(self, x, y, z):
-		return self.blocks[
+		return self.c.get_blocks(
 			x * CHUNK_LENGTH * CHUNK_HEIGHT +
 			z * CHUNK_HEIGHT +
-			y]
+			y)
 
 	def set_block(self, x, y, z, block):
-		self.blocks[
+		self.c.set_blocks(
 			x * CHUNK_LENGTH * CHUNK_HEIGHT +
 			z * CHUNK_HEIGHT +
-			y] = block
+			y, block)
+
+	def copy_blocks(self, blocks):
+		self.c.copy_blocks(blocks)
 
 	def update_subchunk_meshes(self):
 		for subchunk_position in self.subchunks:
@@ -156,15 +146,15 @@ class Chunk:
 	def update_at_position(self, position):
 		x, y, z = position
 
-		lx = int(x % subchunk.SUBCHUNK_WIDTH )
-		ly = int(y % subchunk.SUBCHUNK_HEIGHT)
-		lz = int(z % subchunk.SUBCHUNK_LENGTH)
+		lx = int(x % SUBCHUNK_WIDTH )
+		ly = int(y % SUBCHUNK_HEIGHT)
+		lz = int(z % SUBCHUNK_LENGTH)
 
 		clx, cly, clz = self.world.get_local_position(position)
 
-		sx = math.floor(clx / subchunk.SUBCHUNK_WIDTH)
-		sy = math.floor(cly / subchunk.SUBCHUNK_HEIGHT)
-		sz = math.floor(clz / subchunk.SUBCHUNK_LENGTH)
+		sx = math.floor(clx / SUBCHUNK_WIDTH)
+		sy = math.floor(cly / SUBCHUNK_HEIGHT)
+		sz = math.floor(clz / SUBCHUNK_LENGTH)
 
 		self.subchunks[(sx, sy, sz)].update_mesh()
 
@@ -172,13 +162,13 @@ class Chunk:
 			if subchunk_position in self.subchunks:
 				self.subchunks[subchunk_position].update_mesh()
 
-		if lx == subchunk.SUBCHUNK_WIDTH - 1: try_update_subchunk_mesh((sx + 1, sy, sz))
+		if lx == SUBCHUNK_WIDTH - 1: try_update_subchunk_mesh((sx + 1, sy, sz))
 		if lx == 0: try_update_subchunk_mesh((sx - 1, sy, sz))
 
-		if ly == subchunk.SUBCHUNK_HEIGHT - 1: try_update_subchunk_mesh((sx, sy + 1, sz))
+		if ly == SUBCHUNK_HEIGHT - 1: try_update_subchunk_mesh((sx, sy + 1, sz))
 		if ly == 0: try_update_subchunk_mesh((sx, sy - 1, sz))
 
-		if lz == subchunk.SUBCHUNK_LENGTH - 1: try_update_subchunk_mesh((sx, sy, sz + 1))
+		if lz == SUBCHUNK_LENGTH - 1: try_update_subchunk_mesh((sx, sy, sz + 1))
 		if lz == 0: try_update_subchunk_mesh((sx, sy, sz - 1))
 
 	def update_mesh(self):

@@ -35,7 +35,7 @@ class Save:
 			try:
 				chunk_data = nbt.load(chunk_path)
 
-				blocks   = list(map(int, chunk_data["Level"]["Blocks"]))
+				blocks = list(map(int, chunk_data["Level"]["Blocks"]))
 				entities = [] # chunk_data["Level"]["Entities"]
 
 				# cache blocks
@@ -49,7 +49,7 @@ class Save:
 		# create chunk and fill it with the blocks from our chunk file
 
 		self.world.chunks[chunk_position] = chunk.Chunk(self.world, chunk_position)
-		self.world.chunks[chunk_position].blocks = blocks
+		self.world.chunks[chunk_position].copy_blocks(blocks)
 
 		"""
 		for x in range(chunk.CHUNK_WIDTH):

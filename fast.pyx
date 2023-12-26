@@ -1,28 +1,26 @@
-import chunk
-import subchunk
-
-cdef int CHUNK_WIDTH = chunk.CHUNK_WIDTH
-cdef int CHUNK_HEIGHT = chunk.CHUNK_HEIGHT
-cdef int CHUNK_LENGTH = chunk.CHUNK_LENGTH
+from chunk_common cimport CChunk
+from chunk_common cimport C_CHUNK_WIDTH, C_CHUNK_HEIGHT, C_CHUNK_LENGTH
 
 def get_block_number(chunks, position):
 	x, y, z = position
 
 	chunk_position = (
-		x // CHUNK_WIDTH,
-		y // CHUNK_HEIGHT,
-		z // CHUNK_LENGTH)
+		x // C_CHUNK_WIDTH,
+		y // C_CHUNK_HEIGHT,
+		z // C_CHUNK_LENGTH)
 
 	if not chunk_position in chunks:
 		return 0
 
-	x = x % CHUNK_WIDTH
-	y = y % CHUNK_HEIGHT
-	z = z % CHUNK_LENGTH
+	x = x % C_CHUNK_WIDTH
+	y = y % C_CHUNK_HEIGHT
+	z = z % C_CHUNK_LENGTH
 
-	block_number = chunks[chunk_position].blocks[
-		x * CHUNK_LENGTH * CHUNK_HEIGHT +
-		z * CHUNK_HEIGHT +
+	cdef CChunk c_chunk = chunks[chunk_position].c
+
+	block_number = c_chunk.blocks[
+		x * C_CHUNK_LENGTH * C_CHUNK_HEIGHT +
+		z * C_CHUNK_HEIGHT +
 		y]
 
 	return block_number

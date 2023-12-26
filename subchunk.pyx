@@ -1,52 +1,47 @@
 import chunk
+from chunk_common cimport CChunk, CSubchunk
+from chunk_common cimport C_CHUNK_WIDTH, C_CHUNK_HEIGHT, C_CHUNK_LENGTH
+from chunk_common cimport C_SUBCHUNK_WIDTH, C_SUBCHUNK_HEIGHT, C_SUBCHUNK_LENGTH
 
 from libc.stdlib cimport malloc, realloc, free
 from libc.string cimport memcpy
-from libc.stdint cimport uint32_t
+from libc.stdint cimport uint32_t, uint8_t
 from pyglet.gl import gl
 
-cdef int CHUNK_WIDTH = 16
-cdef int CHUNK_HEIGHT = 128
-cdef int CHUNK_LENGTH = 16
-
-SUBCHUNK_WIDTH = 4
-SUBCHUNK_HEIGHT = 4
-SUBCHUNK_LENGTH = 4
-
-cdef int C_SUBCHUNK_WIDTH  = SUBCHUNK_WIDTH
-cdef int C_SUBCHUNK_HEIGHT = SUBCHUNK_HEIGHT
-cdef int C_SUBCHUNK_LENGTH = SUBCHUNK_LENGTH
-
-cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, block_type, int x_, int y_, int z_):
-	cdef int x = x_ % CHUNK_WIDTH
-	cdef int y = y_ % CHUNK_HEIGHT
-	cdef int z = z_ % CHUNK_LENGTH
+cdef bint can_render_face(uint8_t* parent_blocks, chunks, block_types, int block_number, block_type, int x_, int y_, int z_):
+	cdef int x = x_ % C_CHUNK_WIDTH
+	cdef int y = y_ % C_CHUNK_HEIGHT
+	cdef int z = z_ % C_CHUNK_LENGTH
 
 	cdef int adj_number = 0
 
+	cdef CChunk c_chunk
+
 	# getting block number from adjacent chunks is relatively slow, but we can just index the chunk directly if we know we're not on the edges of it
 
-	if x == 0 or x == CHUNK_WIDTH - 1 or y == 0 or y == CHUNK_HEIGHT - 1 or z == 0 or z == CHUNK_LENGTH - 1:
+	if x == 0 or x == C_CHUNK_WIDTH - 1 or y == 0 or y == C_CHUNK_HEIGHT - 1 or z == 0 or z == C_CHUNK_LENGTH - 1:
 		chunk_position = (
-			x_ // CHUNK_WIDTH,
-			y_ // CHUNK_HEIGHT,
-			z_ // CHUNK_LENGTH)
+			x_ // C_CHUNK_WIDTH,
+			y_ // C_CHUNK_HEIGHT,
+			z_ // C_CHUNK_LENGTH)
 
 		if chunk_position in chunks:
-			adj_number = chunks[chunk_position].blocks[
-				x * CHUNK_LENGTH * CHUNK_HEIGHT +
-				z * CHUNK_HEIGHT +
+			c_chunk = chunks[chunk_position].c
+
+			adj_number = c_chunk.blocks[
+				x * C_CHUNK_LENGTH * C_CHUNK_HEIGHT +
+				z * C_CHUNK_HEIGHT +
 				y]
 
 	else:
 		adj_number = parent_blocks[
-			x * CHUNK_LENGTH * CHUNK_HEIGHT +
-			z * CHUNK_HEIGHT +
+			x * C_CHUNK_LENGTH * C_CHUNK_HEIGHT +
+			z * C_CHUNK_HEIGHT +
 			y]
 
 	adj_type = block_types[adj_number]
 
-	if not adj_type: # or adj_type.transparent: # TODO getting transparent attribute of adjacent block incurs a lot of overhead
+	if not adj_number or adj_type.transparent: # TODO getting transparent attribute of adjacent block incurs a lot of overhead
 		if block_type.glass and adj_number == block_number: # rich compare between adj_number and block_number prevented
 			return False
 
@@ -105,7 +100,9 @@ cdef update_mesh(self):
 
 	chunks = self.world.chunks
 	block_types = self.world.block_types
-	parent_blocks = self.parent.blocks
+
+	cdef CChunk c_parent = self.parent.c
+	cdef uint8_t* parent_blocks = c_parent.blocks
 
 	cdef int slx = self.local_position[0]
 	cdef int sly = self.local_position[1]
@@ -128,8 +125,8 @@ cdef update_mesh(self):
 				parent_lz = slz + local_z
 
 				block_number = parent_blocks[
-					parent_lx * CHUNK_LENGTH * CHUNK_HEIGHT +
-					parent_lz * CHUNK_HEIGHT +
+					parent_lx * C_CHUNK_LENGTH * C_CHUNK_HEIGHT +
+					parent_lz * C_CHUNK_HEIGHT +
 					parent_ly]
 
 				if block_number:
@@ -150,21 +147,10 @@ cdef update_mesh(self):
 						if can_render_face(parent_blocks, chunks, block_types, block_number, block_type, x, y - 1, z): add_face(3)
 						if can_render_face(parent_blocks, chunks, block_types, block_number, block_type, x, y, z + 1): add_face(4)
 						if can_render_face(parent_blocks, chunks, block_types, block_number, block_type, x, y, z - 1): add_face(5)
-					
+
 					else:
 						for i in range(len(block_type.vertex_positions)):
 							add_face(i)
-
-cdef class CSubchunk:
-	cdef size_t data_count
-	cdef float* data
-
-	cdef size_t index_count
-	cdef uint32_t* indices
-
-	def __init__(self):
-		self.data_count = 0
-		self.index_count = 0
 
 class Subchunk:
 	def __init__(self, parent, subchunk_position):
