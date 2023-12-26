@@ -142,12 +142,7 @@ class World:
 
 		self.chunks = {}
 		self.entities = []
-
 		self.save.load()
-
-		for chunk_position in self.chunks:
-			self.chunks[chunk_position].update_subchunk_meshes()
-			self.chunks[chunk_position].update_mesh()
 
 		# create player
 

@@ -123,6 +123,10 @@ class Chunk:
 		self.ibo = gl.GLuint(0)
 		gl.glGenBuffers(1, self.ibo)
 
+	@property
+	def loaded(self):
+		return self.c.index_count > 0
+
 	def get_block(self, x, y, z):
 		return self.c.get_blocks(
 			x * CHUNK_LENGTH * CHUNK_HEIGHT +
@@ -175,7 +179,7 @@ class Chunk:
 		update_mesh(self)
 
 	def draw(self):
-		if not self.c.index_count:
+		if not self.loaded:
 			return
 		
 		gl.glBindVertexArray(self.vao)

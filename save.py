@@ -51,16 +51,6 @@ class Save:
 		self.world.chunks[chunk_position] = chunk.Chunk(self.world, chunk_position)
 		self.world.chunks[chunk_position].copy_blocks(blocks)
 
-		"""
-		for x in range(chunk.CHUNK_WIDTH):
-			for y in range(chunk.CHUNK_HEIGHT):
-				for z in range(chunk.CHUNK_LENGTH):
-					self.world.chunks[chunk_position].blocks[x][y][z] = blocks[
-						x * chunk.CHUNK_LENGTH * chunk.CHUNK_HEIGHT +
-						z * chunk.CHUNK_HEIGHT +
-						y]
-		"""
-
 		# load entities from chunk
 
 		for entity in entities:
