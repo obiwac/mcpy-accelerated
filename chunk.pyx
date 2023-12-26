@@ -15,12 +15,6 @@ CHUNK_LENGTH = 16
 import subchunk
 from subchunk cimport SubchunkMeshData
 
-"""
-import pyglet.gl.glx as glx
-
-ctypedef void (*glBufferData_t)(int target, int size, void* data, int usage)
-"""
-
 cdef class ChunkMeshData:
 	cdef size_t data_count
 	cdef float* data
@@ -37,11 +31,6 @@ cdef send_mesh_data_to_gpu(self): # pass mesh data to gpu
 
 	if not mesh_data.index_count:
 		return
-
-	"""
-	name = ctypes.cast(ctypes.pointer(ctypes.create_string_buffer(b"glBufferData")), ctypes.POINTER(ctypes.c_ubyte))
-	cdef glBufferData_t glBufferData = <glBufferData_t><size_t>glx.glXGetProcAddress(name)
-	"""
 
 	gl.glBindVertexArray(self.vao)
 
