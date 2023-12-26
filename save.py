@@ -123,6 +123,8 @@ class Save:
 			for y in range(-2, 2):
 				self.load_chunk((x, 0, y))
 
+		self.load_chunk((0, 0, 0))
+
 	def save(self):
 		for chunk_position in self.world.chunks:
 			if chunk_position[1] != 0: # reject all chunks above and below the world limit

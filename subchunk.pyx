@@ -1,16 +1,20 @@
 import chunk
 
-cdef int CHUNK_WIDTH = chunk.CHUNK_WIDTH
-cdef int CHUNK_HEIGHT = chunk.CHUNK_HEIGHT
-cdef int CHUNK_LENGTH = chunk.CHUNK_LENGTH
+from libc.stdlib cimport malloc, realloc
+from libc.string cimport memcpy
+from pyglet.gl import gl
 
-cdef int C_SUBCHUNK_WIDTH  = 4
-cdef int C_SUBCHUNK_HEIGHT = 4
-cdef int C_SUBCHUNK_LENGTH = 4
+cdef int CHUNK_WIDTH = 16
+cdef int CHUNK_HEIGHT = 128
+cdef int CHUNK_LENGTH = 16
 
-SUBCHUNK_WIDTH = C_SUBCHUNK_WIDTH
-SUBCHUNK_HEIGHT = C_SUBCHUNK_HEIGHT
-SUBCHUNK_LENGTH = C_SUBCHUNK_LENGTH
+SUBCHUNK_WIDTH = 4
+SUBCHUNK_HEIGHT = 4
+SUBCHUNK_LENGTH = 4
+
+cdef int C_SUBCHUNK_WIDTH  = SUBCHUNK_WIDTH
+cdef int C_SUBCHUNK_HEIGHT = SUBCHUNK_HEIGHT
+cdef int C_SUBCHUNK_LENGTH = SUBCHUNK_LENGTH
 
 cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, block_type, int x_, int y_, int z_):
 	cdef int x = x_ % CHUNK_WIDTH
@@ -19,7 +23,7 @@ cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, 
 
 	cdef int adj_number = 0
 
-	# get_block_number is relatively slow, but we can just index the chunk directly if we know we're not on the edges of it
+	# getting block number from adjacent chunks is relatively slow, but we can just index the chunk directly if we know we're not on the edges of it
 
 	if x == 0 or x == CHUNK_WIDTH - 1 or y == 0 or y == CHUNK_HEIGHT - 1 or z == 0 or z == CHUNK_LENGTH - 1:
 		chunk_position = (
@@ -49,8 +53,13 @@ cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, 
 
 	return False
 
-def update_mesh(self):
-	self.mesh_data = []
+cdef int mesh_data_count = 0
+cdef float* mesh_data
+
+cdef update_mesh(self, SubchunkMeshData mesh_data):
+	mesh_data.mesh_data_count = 0
+	mesh_data.mesh_data = <float*>malloc(1)
+
 	self.mesh_index_counter = 0
 	self.mesh_indices = []
 
@@ -59,7 +68,7 @@ def update_mesh(self):
 		tex_coords = block_type.tex_coords[face]
 		shading_values = block_type.shading_values[face]
 
-		data = [0.] * (4 * 7)
+		cdef float[4 * 7] data
 		cdef int i
 
 		for i in range(4):
@@ -72,8 +81,10 @@ def update_mesh(self):
 			data[i * 7 + 5] = tex_coords[i * 3 + 2]
 
 			data[i * 7 + 6] = shading_values[i]
-		
-		self.mesh_data.extend(data)
+
+		mesh_data.mesh_data_count += sizeof(data) // sizeof(data[0])
+		mesh_data.mesh_data = <float*>realloc(mesh_data.mesh_data, mesh_data.mesh_data_count * sizeof(data[0]))
+		memcpy(<void*>mesh_data.mesh_data + mesh_data.mesh_data_count * sizeof(data[0]) - sizeof(data), data, sizeof(data))
 
 		cdef int[6] indices = [0, 1, 2, 0, 2, 3]
 
@@ -135,6 +146,10 @@ def update_mesh(self):
 						for i in range(len(block_type.vertex_positions)):
 							add_face(i)
 
+cdef class SubchunkMeshData:
+	cdef size_t mesh_data_count
+	cdef float* mesh_data
+
 class Subchunk:
 	def __init__(self, parent, subchunk_position):
 		self.parent = parent
@@ -154,9 +169,10 @@ class Subchunk:
 
 		# mesh variables
 
-		self.mesh_data = []
+		self.mesh_data = SubchunkMeshData()
+
 		self.mesh_index_counter = 0
 		self.mesh_indices = []
 	
 	def update_mesh(self):
-		update_mesh(self)
+		update_mesh(self, self.mesh_data)

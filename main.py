@@ -33,7 +33,7 @@ class Window(pyglet.window.Window):
 
 	def update(self, delta_time):
 		self.frame += 1
-		print(f"FPS: {1.0 / delta_time}")
+		# print(f"FPS: {1.0 / delta_time}")
 
 		if not self.mouse_captured:
 			self.world.player.input = [0, 0, 0]
