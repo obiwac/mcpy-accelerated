@@ -22,13 +22,20 @@ ctypedef void (*glBufferData_t)(int target, int size, void* data, int usage)
 """
 
 cdef class ChunkMeshData:
-	cdef size_t mesh_data_count
-	cdef float* mesh_data
+	cdef size_t data_count
+	cdef float* data
+
+	cdef size_t index_count
+	cdef int* indices
+
+	@property
+	def index_count(self):
+		return self.index_count
 
 cdef send_mesh_data_to_gpu(self): # pass mesh data to gpu
 	cdef ChunkMeshData mesh_data = self.mesh_data
 
-	if not self.mesh_index_counter:
+	if not mesh_data.index_count:
 		return
 
 	"""
@@ -41,8 +48,8 @@ cdef send_mesh_data_to_gpu(self): # pass mesh data to gpu
 	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbo)
 	gl.glBufferData(
 		gl.GL_ARRAY_BUFFER,
-		mesh_data.mesh_data_count * sizeof(mesh_data.mesh_data[0]),
-		ctypes.cast(<size_t>mesh_data.mesh_data, ctypes.POINTER(gl.GLfloat)),
+		mesh_data.data_count * sizeof(mesh_data.data[0]),
+		ctypes.cast(<size_t>mesh_data.data, ctypes.POINTER(gl.GLfloat)),
 		gl.GL_STATIC_DRAW)
 
 	f = ctypes.sizeof(gl.GLfloat)
@@ -58,45 +65,51 @@ cdef send_mesh_data_to_gpu(self): # pass mesh data to gpu
 	gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.ibo)
 	gl.glBufferData(
 		gl.GL_ELEMENT_ARRAY_BUFFER,
-		ctypes.sizeof(gl.GLuint * self.mesh_indices_length),
-		(gl.GLuint * self.mesh_indices_length) (*self.mesh_indices),
+		mesh_data.index_count * sizeof(mesh_data.indices[0]),
+		ctypes.cast(<size_t>mesh_data.indices, ctypes.POINTER(gl.GLuint)),
 		gl.GL_STATIC_DRAW)
 
 cdef update_mesh(self, ChunkMeshData mesh_data):
 	# combine all the small subchunk meshes into one big chunk mesh
 
-	cdef int target_mesh_data_count = 0
+	cdef int target_data_count = 0
+	cdef int target_index_count = 0
+
 	cdef SubchunkMeshData subchunk_mesh_data
 
 	for subchunk in self.subchunks.values():
 		subchunk_mesh_data = subchunk.mesh_data
-		target_mesh_data_count += subchunk_mesh_data.mesh_data_count
 
-	mesh_data.mesh_data_count = 0
-	mesh_data.mesh_data = <float*>malloc(target_mesh_data_count * sizeof(mesh_data.mesh_data[0]))
+		target_data_count += subchunk_mesh_data.data_count
+		target_index_count += subchunk_mesh_data.index_count
 
-	self.mesh_index_counter = 0
-	self.mesh_indices = []
+	mesh_data.data_count = 0
+	mesh_data.data = <float*>malloc(target_data_count * sizeof(mesh_data.data[0]))
+
+	mesh_data.index_count = 0
+	mesh_data.indices = <int*>malloc(target_index_count * sizeof(mesh_data.indices[0]))
+
+	cdef size_t i
 
 	for subchunk_position in self.subchunks:
 		subchunk = self.subchunks[subchunk_position]
 		subchunk_mesh_data = subchunk.mesh_data
 
-		mesh_data.mesh_data[mesh_data.mesh_data_count: mesh_data.mesh_data_count + subchunk_mesh_data.mesh_data_count] = subchunk_mesh_data.mesh_data
-		mesh_data.mesh_data_count += subchunk_mesh_data.mesh_data_count
+		mesh_data.data[mesh_data.data_count: mesh_data.data_count + subchunk_mesh_data.data_count] = subchunk_mesh_data.data
+		mesh_data.data_count += subchunk_mesh_data.data_count
 
-		mesh_indices = [index + self.mesh_index_counter for index in subchunk.mesh_indices]
-		self.mesh_indices.extend(mesh_indices)
-		self.mesh_index_counter += subchunk.mesh_index_counter
+		for i in range(subchunk_mesh_data.index_count):
+			mesh_data.indices[mesh_data.index_count + i] = subchunk_mesh_data.indices[i] + mesh_data.index_count // 6 * 4
+
+		mesh_data.index_count += subchunk_mesh_data.index_count
 
 	# send the full mesh data to the GPU and free the memory used client-side (we don't need it anymore)
 	# don't forget to save the length of 'self.mesh_indices' before freeing
 
-	self.mesh_indices_length = len(self.mesh_indices)
 	send_mesh_data_to_gpu(self)
 
-	free(mesh_data.mesh_data)
-	del self.mesh_indices
+	free(mesh_data.data)
+	free(mesh_data.indices)
 
 class Chunk:
 	def __init__(self, world, chunk_position):
@@ -121,8 +134,6 @@ class Chunk:
 		# mesh variables
 
 		self.mesh_data = ChunkMeshData()
-		self.mesh_index_counter = 0
-		self.mesh_indices = []
 
 		# create VAO, VBO, and IBO
 
@@ -185,13 +196,13 @@ class Chunk:
 		update_mesh(self, self.mesh_data)
 
 	def draw(self):
-		if not self.mesh_index_counter:
+		if not self.mesh_data.index_count:
 			return
 		
 		gl.glBindVertexArray(self.vao)
 
 		gl.glDrawElements(
 			gl.GL_TRIANGLES,
-			self.mesh_indices_length,
+			self.mesh_data.index_count,
 			gl.GL_UNSIGNED_INT,
 			None)

@@ -2,6 +2,7 @@ import chunk
 
 from libc.stdlib cimport malloc, realloc, free
 from libc.string cimport memcpy
+from libc.stdint cimport uint32_t
 from pyglet.gl import gl
 
 cdef int CHUNK_WIDTH = 16
@@ -57,14 +58,17 @@ cdef int mesh_data_count = 0
 cdef float* mesh_data
 
 cdef update_mesh(self, SubchunkMeshData mesh_data):
-	if mesh_data.mesh_data_count:
-		free(mesh_data.mesh_data)
+	if mesh_data.data_count:
+		free(mesh_data.data)
 
-	mesh_data.mesh_data_count = 0
-	mesh_data.mesh_data = <float*>malloc(1)
+	if mesh_data.index_count:
+		free(mesh_data.indices)
 
-	self.mesh_index_counter = 0
-	self.mesh_indices = []
+	mesh_data.data_count = 0
+	mesh_data.data = <float*>malloc(1)
+
+	mesh_data.index_count = 0
+	mesh_data.indices = <uint32_t*>malloc(1)
 
 	def add_face(face):
 		vertex_positions = block_type.vertex_positions[face]
@@ -72,7 +76,7 @@ cdef update_mesh(self, SubchunkMeshData mesh_data):
 		shading_values = block_type.shading_values[face]
 
 		cdef float[4 * 7] data
-		cdef int i
+		cdef size_t i
 
 		for i in range(4):
 			data[i * 7 + 0] = vertex_positions[i * 3 + 0] + x
@@ -85,17 +89,20 @@ cdef update_mesh(self, SubchunkMeshData mesh_data):
 
 			data[i * 7 + 6] = shading_values[i]
 
-		mesh_data.mesh_data_count += sizeof(data) // sizeof(data[0])
-		mesh_data.mesh_data = <float*>realloc(mesh_data.mesh_data, mesh_data.mesh_data_count * sizeof(data[0]))
-		memcpy(<void*>mesh_data.mesh_data + mesh_data.mesh_data_count * sizeof(data[0]) - sizeof(data), data, sizeof(data))
+		# TODO make realloc not increment one at a time
 
-		cdef int[6] indices = [0, 1, 2, 0, 2, 3]
+		mesh_data.data_count += sizeof(data) // sizeof(data[0])
+		mesh_data.data = <float*>realloc(mesh_data.data, mesh_data.data_count * sizeof(data[0]))
+		memcpy(<void*>mesh_data.data + mesh_data.data_count * sizeof(data[0]) - sizeof(data), data, sizeof(data))
+
+		cdef uint32_t[6] indices = [0, 1, 2, 0, 2, 3]
 
 		for i in range(6):
-			indices[i] += self.mesh_index_counter
-		
-		self.mesh_indices.extend(indices)
-		self.mesh_index_counter += 4
+			indices[i] += mesh_data.index_count // 6 * 4
+
+		mesh_data.index_count += sizeof(indices) // sizeof(indices[0])
+		mesh_data.indices = <uint32_t*>realloc(mesh_data.indices, mesh_data.index_count * sizeof(indices[0]))
+		memcpy(<void*>mesh_data.indices + mesh_data.index_count * sizeof(indices[0]) - sizeof(indices), indices, sizeof(indices))
 
 	chunks = self.world.chunks
 	block_types = self.world.block_types
@@ -150,11 +157,15 @@ cdef update_mesh(self, SubchunkMeshData mesh_data):
 							add_face(i)
 
 cdef class SubchunkMeshData:
-	cdef size_t mesh_data_count
-	cdef float* mesh_data
+	cdef size_t data_count
+	cdef float* data
+
+	cdef size_t index_count
+	cdef uint32_t* indices
 
 	def __init__(self):
-		self.mesh_data_count = 0
+		self.data_count = 0
+		self.index_count = 0
 
 class Subchunk:
 	def __init__(self, parent, subchunk_position):
@@ -177,8 +188,5 @@ class Subchunk:
 
 		self.mesh_data = SubchunkMeshData()
 
-		self.mesh_index_counter = 0
-		self.mesh_indices = []
-	
 	def update_mesh(self):
 		update_mesh(self, self.mesh_data)
