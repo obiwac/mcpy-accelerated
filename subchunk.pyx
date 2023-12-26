@@ -46,7 +46,7 @@ cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, 
 
 	adj_type = block_types[adj_number]
 
-	if not adj_type or adj_type.transparent: # TODO getting transparent attribute of adjacent block incurs a lot of overhead
+	if not adj_type: # or adj_type.transparent: # TODO getting transparent attribute of adjacent block incurs a lot of overhead
 		if block_type.glass and adj_number == block_number: # rich compare between adj_number and block_number prevented
 			return False
 
@@ -54,21 +54,20 @@ cdef bint can_render_face(parent_blocks, chunks, block_types, int block_number, 
 
 	return False
 
-cdef int mesh_data_count = 0
-cdef float* mesh_data
+cdef update_mesh(self):
+	cdef CSubchunk c = self.c
 
-cdef update_mesh(self, SubchunkMeshData mesh_data):
-	if mesh_data.data_count:
-		free(mesh_data.data)
+	if c.data_count:
+		free(c.data)
 
-	if mesh_data.index_count:
-		free(mesh_data.indices)
+	if c.index_count:
+		free(c.indices)
 
-	mesh_data.data_count = 0
-	mesh_data.data = <float*>malloc(1)
+	c.data_count = 0
+	c.data = <float*>malloc(1)
 
-	mesh_data.index_count = 0
-	mesh_data.indices = <uint32_t*>malloc(1)
+	c.index_count = 0
+	c.indices = <uint32_t*>malloc(1)
 
 	def add_face(face):
 		vertex_positions = block_type.vertex_positions[face]
@@ -91,18 +90,18 @@ cdef update_mesh(self, SubchunkMeshData mesh_data):
 
 		# TODO make realloc not increment one at a time
 
-		mesh_data.data_count += sizeof(data) // sizeof(data[0])
-		mesh_data.data = <float*>realloc(mesh_data.data, mesh_data.data_count * sizeof(data[0]))
-		memcpy(<void*>mesh_data.data + mesh_data.data_count * sizeof(data[0]) - sizeof(data), data, sizeof(data))
+		c.data_count += sizeof(data) // sizeof(data[0])
+		c.data = <float*>realloc(c.data, c.data_count * sizeof(data[0]))
+		memcpy(<void*>c.data + c.data_count * sizeof(data[0]) - sizeof(data), data, sizeof(data))
 
 		cdef uint32_t[6] indices = [0, 1, 2, 0, 2, 3]
 
 		for i in range(6):
-			indices[i] += mesh_data.index_count // 6 * 4
+			indices[i] += c.index_count // 6 * 4
 
-		mesh_data.index_count += sizeof(indices) // sizeof(indices[0])
-		mesh_data.indices = <uint32_t*>realloc(mesh_data.indices, mesh_data.index_count * sizeof(indices[0]))
-		memcpy(<void*>mesh_data.indices + mesh_data.index_count * sizeof(indices[0]) - sizeof(indices), indices, sizeof(indices))
+		c.index_count += sizeof(indices) // sizeof(indices[0])
+		c.indices = <uint32_t*>realloc(c.indices, c.index_count * sizeof(indices[0]))
+		memcpy(<void*>c.indices + c.index_count * sizeof(indices[0]) - sizeof(indices), indices, sizeof(indices))
 
 	chunks = self.world.chunks
 	block_types = self.world.block_types
@@ -156,7 +155,7 @@ cdef update_mesh(self, SubchunkMeshData mesh_data):
 						for i in range(len(block_type.vertex_positions)):
 							add_face(i)
 
-cdef class SubchunkMeshData:
+cdef class CSubchunk:
 	cdef size_t data_count
 	cdef float* data
 
@@ -184,9 +183,7 @@ class Subchunk:
 			self.parent.position[1] + self.local_position[1],
 			self.parent.position[2] + self.local_position[2])
 
-		# mesh variables
-
-		self.mesh_data = SubchunkMeshData()
+		self.c = CSubchunk()
 
 	def update_mesh(self):
-		update_mesh(self, self.mesh_data)
+		update_mesh(self)
