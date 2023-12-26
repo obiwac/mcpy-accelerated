@@ -1,6 +1,6 @@
 import chunk
 
-from libc.stdlib cimport malloc, realloc
+from libc.stdlib cimport malloc, realloc, free
 from libc.string cimport memcpy
 from pyglet.gl import gl
 
@@ -57,6 +57,9 @@ cdef int mesh_data_count = 0
 cdef float* mesh_data
 
 cdef update_mesh(self, SubchunkMeshData mesh_data):
+	if mesh_data.mesh_data_count:
+		free(mesh_data.mesh_data)
+
 	mesh_data.mesh_data_count = 0
 	mesh_data.mesh_data = <float*>malloc(1)
 
@@ -149,6 +152,9 @@ cdef update_mesh(self, SubchunkMeshData mesh_data):
 cdef class SubchunkMeshData:
 	cdef size_t mesh_data_count
 	cdef float* mesh_data
+
+	def __init__(self):
+		self.mesh_data_count = 0
 
 class Subchunk:
 	def __init__(self, parent, subchunk_position):
