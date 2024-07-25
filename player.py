@@ -4,7 +4,8 @@ import glm
 import entity
 
 WALKING_SPEED = 4.317
-SPRINTING_SPEED = 7 # faster than in Minecraft, feels better
+SPRINTING_SPEED = 7  # faster than in Minecraft, feels better
+
 
 class Player(entity.Entity):
 	def __init__(self, world, width, height):
@@ -53,14 +54,19 @@ class Player(entity.Entity):
 
 		self.world.p_matrix = glm.perspective(
 			glm.radians(90 + 10 * (self.speed - WALKING_SPEED) / (SPRINTING_SPEED - WALKING_SPEED)),
-			float(self.view_width) / self.view_height, 0.1, 500)
+			float(self.view_width) / self.view_height,
+			0.1,
+			500,
+		)
 
 		# create modelview matrix
 
 		self.world.mv_matrix = glm.mat4(1)
 		self.world.mv_matrix = glm.rotate(self.world.mv_matrix, self.rotation[1], glm.vec3(-1, 0, 0))
 		self.world.mv_matrix = glm.rotate(self.world.mv_matrix, self.rotation[0] + math.tau / 4, glm.vec3(0, 1, 0))
-		self.world.mv_matrix = glm.translate(self.world.mv_matrix, -glm.vec3(*self.position) - glm.vec3(0, self.eyelevel, 0))
+		self.world.mv_matrix = glm.translate(
+			self.world.mv_matrix, -glm.vec3(*self.position) - glm.vec3(0, self.eyelevel, 0)
+		)
 
 		# modelviewprojection matrix
 

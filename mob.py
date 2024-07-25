@@ -3,6 +3,7 @@ import math
 
 import entity
 
+
 class Mob(entity.Entity):
 	def __init__(self, world, entity_type):
 		super().__init__(world, entity_type)
@@ -16,7 +17,7 @@ class Mob(entity.Entity):
 		self.target = [x + random.randint(-5, 5) for x in self.position]
 
 	def update(self, delta_time):
-		if not random.randint(0, int(3 / delta_time)): # change target every 3 seconds on average
+		if not random.randint(0, int(3 / delta_time)):  # change target every 3 seconds on average
 			self.select_target()
 
 		delta_x = self.position[0] - self.target[0]
@@ -31,10 +32,10 @@ class Mob(entity.Entity):
 		else:
 			self.rotation[0] += (self.heading - self.rotation[0]) * delta_time * 5
 
-		target_dist = math.sqrt(delta_x ** 2 + delta_y ** 2)
+		target_dist = math.sqrt(delta_x**2 + delta_y**2)
 
 		if target_dist > 1:
-			self.accel[0] =  math.cos(self.rotation[0] + math.tau / 4) * 3
+			self.accel[0] = math.cos(self.rotation[0] + math.tau / 4) * 3
 			self.accel[2] = -math.sin(self.rotation[0] + math.tau / 4) * 3
 
 		super().update(delta_time)

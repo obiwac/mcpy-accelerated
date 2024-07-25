@@ -6,17 +6,18 @@ import gzip
 import chunk
 import mob
 
+
 class Save:
-	def __init__(self, world, path = "save"):
+	def __init__(self, world, path="save"):
 		self.world = world
 		self.path = path
 
 	def chunk_position_to_path(self, chunk_position):
 		x, _, z = chunk_position
 
-		chunk_path = '/'.join((self.path,
-			base36.dumps(x % 64), base36.dumps(z % 64),
-			f"c.{base36.dumps(x)}.{base36.dumps(z)}.dat"))
+		chunk_path = "/".join(
+			(self.path, base36.dumps(x % 64), base36.dumps(z % 64), f"c.{base36.dumps(x)}.{base36.dumps(z)}.dat")
+		)
 
 		return chunk_path
 
@@ -36,7 +37,7 @@ class Save:
 				chunk_data = nbt.load(chunk_path)
 
 				blocks = list(map(int, chunk_data["Level"]["Blocks"]))
-				entities = [] # chunk_data["Level"]["Entities"]
+				entities = []  # chunk_data["Level"]["Entities"]
 
 				# cache blocks
 
@@ -60,7 +61,7 @@ class Save:
 				continue
 
 			mob_ = mob.Mob(self.world, self.world.entity_types[name])
-			*mob_.position, = entity["Pos"]
+			(*mob_.position,) = entity["Pos"]
 
 			print(name, mob_.position)
 
@@ -91,14 +92,15 @@ class Save:
 			for y in range(chunk.CHUNK_HEIGHT):
 				for z in range(chunk.CHUNK_LENGTH):
 					chunk_blocks[
-						x * chunk.CHUNK_LENGTH * chunk.CHUNK_HEIGHT +
-						z * chunk.CHUNK_HEIGHT +
-						y] = self.world.chunks[chunk_position].blocks[x][y][z]
+						x * chunk.CHUNK_LENGTH * chunk.CHUNK_HEIGHT + z * chunk.CHUNK_HEIGHT + y
+					] = self.world.chunks[
+						chunk_position
+					].blocks[x][y][z]
 
 		# save the chunk file
 
 		chunk_data["Level"]["Blocks"] = chunk_blocks
-		chunk_data.save(chunk_path, gzipped = True)
+		chunk_data.save(chunk_path, gzipped=True)
 
 	def load(self):
 		# for x in range(-16, 15):
@@ -117,7 +119,7 @@ class Save:
 
 	def save(self):
 		for chunk_position in self.world.chunks:
-			if chunk_position[1] != 0: # reject all chunks above and below the world limit
+			if chunk_position[1] != 0:  # reject all chunks above and below the world limit
 				continue
 
 			chunk = self.world.chunks[chunk_position]

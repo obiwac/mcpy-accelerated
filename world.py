@@ -18,6 +18,7 @@ import entity_type
 
 import models
 
+
 class World:
 	def __init__(self, width, height):
 		self.texture_manager = texture_manager.Texture_manager(16, 16, 256)
@@ -31,10 +32,10 @@ class World:
 			blocks_data = f.readlines()
 
 		for block in blocks_data:
-			if block[0] in ['\n', '#']: # skip if empty line or comment
+			if block[0] in ["\n", "#"]:  # skip if empty line or comment
 				continue
 
-			number, props = block.split(':', 1)
+			number, props = block.split(":", 1)
 			number = int(number)
 
 			# default block
@@ -45,9 +46,9 @@ class World:
 
 			# read properties
 
-			for prop in props.split(','):
+			for prop in props.split(","):
 				prop = prop.strip()
-				prop = list(filter(None, prop.split(' ', 1)))
+				prop = list(filter(None, prop.split(" ", 1)))
 
 				if prop[0] == "sameas":
 					sameas_number = int(prop[1])
@@ -60,7 +61,7 @@ class World:
 					name = eval(prop[1])
 
 				elif prop[0][:7] == "texture":
-					_, side = prop[0].split('.')
+					_, side = prop[0].split(".")
 					texture[side] = prop[1].strip()
 
 				elif prop[0] == "model":
@@ -84,10 +85,10 @@ class World:
 			entities_data = f.readlines()
 
 		for _entity in entities_data:
-			if _entity[0] in "\n#": # skip if empty line or comment
+			if _entity[0] in "\n#":  # skip if empty line or comment
 				continue
 
-			name, props = _entity.split(':', 1)
+			name, props = _entity.split(":", 1)
 
 			# default entity
 
@@ -99,9 +100,9 @@ class World:
 
 			# read properties
 
-			for prop in props.split(','):
+			for prop in props.split(","):
 				prop = prop.strip()
-				*prop, = filter(None, prop.split(' ', 1))
+				(*prop,) = filter(None, prop.split(" ", 1))
 
 				if prop[0] == "width":
 					width = float(prop[1])
@@ -121,8 +122,8 @@ class World:
 
 		# matrices
 
-		self.mv_matrix  = glm.mat4()
-		self.p_matrix   = glm.mat4()
+		self.mv_matrix = glm.mat4()
+		self.p_matrix = glm.mat4()
 		self.mvp_matrix = glm.mat4()
 
 		# shaders
@@ -133,7 +134,9 @@ class World:
 
 		self.entity_shader = shader.Shader("shaders/entity/vert.glsl", "shaders/entity/frag.glsl")
 		self.entity_shader_sampler_location = self.entity_shader.find_uniform(b"texture_sampler")
-		self.entity_shader_inverse_transform_matrix_location = self.entity_shader.find_uniform(b"inverse_transform_matrix")
+		self.entity_shader_inverse_transform_matrix_location = self.entity_shader.find_uniform(
+			b"inverse_transform_matrix"
+		)
 		self.entity_shader_matrix_location = self.entity_shader.find_uniform(b"matrix")
 
 		# load the world
@@ -151,18 +154,12 @@ class World:
 	def get_chunk_position(self, position):
 		x, y, z = position
 
-		return (
-			x // chunk.CHUNK_WIDTH,
-			y // chunk.CHUNK_HEIGHT,
-			z // chunk.CHUNK_LENGTH)
+		return (x // chunk.CHUNK_WIDTH, y // chunk.CHUNK_HEIGHT, z // chunk.CHUNK_LENGTH)
 
 	def get_local_position(self, position):
 		x, y, z = position
 
-		return (
-			int(x % chunk.CHUNK_WIDTH),
-			int(y % chunk.CHUNK_HEIGHT),
-			int(z % chunk.CHUNK_LENGTH))
+		return (int(x % chunk.CHUNK_WIDTH), int(y % chunk.CHUNK_HEIGHT), int(z % chunk.CHUNK_LENGTH))
 
 	def get_block_number(self, position):
 		chunk_position = self.get_chunk_position(position)
@@ -175,17 +172,17 @@ class World:
 		block_number = self.chunks[chunk_position].get_block(*pos)
 		return block_number
 
-	def set_block(self, position, number): # set number to 0 (air) to remove block
+	def set_block(self, position, number):  # set number to 0 (air) to remove block
 		x, y, z = position
 		chunk_position = self.get_chunk_position(position)
 
-		if not chunk_position in self.chunks: # if no chunks exist at this position, create a new one
+		if not chunk_position in self.chunks:  # if no chunks exist at this position, create a new one
 			if number == 0:
-				return # no point in creating a whole new chunk if we're not gonna be adding anything
+				return  # no point in creating a whole new chunk if we're not gonna be adding anything
 
 			self.chunks[chunk_position] = chunk.Chunk(self, chunk_position)
 
-		if self.get_block_number(position) == number: # no point updating mesh if the block is the same
+		if self.get_block_number(position) == number:  # no point updating mesh if the block is the same
 			return
 
 		lx, ly, lz = self.get_local_position(position)
@@ -203,14 +200,20 @@ class World:
 				self.chunks[chunk_position].update_at_position(position)
 				self.chunks[chunk_position].update_mesh()
 
-		if lx == chunk.CHUNK_WIDTH - 1: try_update_chunk_at_position((cx + 1, cy, cz), (x + 1, y, z))
-		if lx == 0: try_update_chunk_at_position((cx - 1, cy, cz), (x - 1, y, z))
+		if lx == chunk.CHUNK_WIDTH - 1:
+			try_update_chunk_at_position((cx + 1, cy, cz), (x + 1, y, z))
+		if lx == 0:
+			try_update_chunk_at_position((cx - 1, cy, cz), (x - 1, y, z))
 
-		if ly == chunk.CHUNK_HEIGHT - 1: try_update_chunk_at_position((cx, cy + 1, cz), (x, y + 1, z))
-		if ly == 0: try_update_chunk_at_position((cx, cy - 1, cz), (x, y - 1, z))
+		if ly == chunk.CHUNK_HEIGHT - 1:
+			try_update_chunk_at_position((cx, cy + 1, cz), (x, y + 1, z))
+		if ly == 0:
+			try_update_chunk_at_position((cx, cy - 1, cz), (x, y - 1, z))
 
-		if lz == chunk.CHUNK_LENGTH - 1: try_update_chunk_at_position((cx, cy, cz + 1), (x, y, z + 1))
-		if lz == 0: try_update_chunk_at_position((cx, cy, cz - 1), (x, y, z - 1))
+		if lz == chunk.CHUNK_LENGTH - 1:
+			try_update_chunk_at_position((cx, cy, cz + 1), (x, y, z + 1))
+		if lz == 0:
+			try_update_chunk_at_position((cx, cy, cz - 1), (x, y, z - 1))
 
 	def try_set_block(self, pos, num, collider):
 		# if we're trying to remove a block, whatever let it go through

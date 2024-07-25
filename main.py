@@ -1,4 +1,3 @@
-
 import math
 import random
 import pyglet
@@ -14,6 +13,7 @@ import world
 import hit
 
 from chunk_common import CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_LENGTH
+
 
 class Window(pyglet.window.Window):
 	def __init__(self, **args):
@@ -31,7 +31,7 @@ class Window(pyglet.window.Window):
 		# misc stuff
 
 		self.frame = 0
-		self.holding = 19 # 5
+		self.holding = 19  # 5
 
 	def update(self, delta_time):
 		self.frame += 1
@@ -106,9 +106,12 @@ class Window(pyglet.window.Window):
 		# handle breaking/placing blocks
 
 		def hit_callback(current_block, next_block):
-			if button == pyglet.window.mouse.RIGHT: self.world.try_set_block(current_block, self.holding, self.world.player.collider)
-			elif button == pyglet.window.mouse.LEFT: self.world.set_block(next_block, 0)
-			elif button == pyglet.window.mouse.MIDDLE: self.holding = self.world.get_block_number(next_block)
+			if button == pyglet.window.mouse.RIGHT:
+				self.world.try_set_block(current_block, self.holding, self.world.player.collider)
+			elif button == pyglet.window.mouse.LEFT:
+				self.world.set_block(next_block, 0)
+			elif button == pyglet.window.mouse.MIDDLE:
+				self.holding = self.world.get_block_number(next_block)
 
 		x, y, z = self.world.player.position
 		y += self.world.player.eyelevel
@@ -135,14 +138,21 @@ class Window(pyglet.window.Window):
 		if not self.mouse_captured:
 			return
 
-		if   key == pyglet.window.key.D: self.world.player.input[0] += 1
-		elif key == pyglet.window.key.A: self.world.player.input[0] -= 1
-		elif key == pyglet.window.key.W: self.world.player.input[2] += 1
-		elif key == pyglet.window.key.S: self.world.player.input[2] -= 1
+		if key == pyglet.window.key.D:
+			self.world.player.input[0] += 1
+		elif key == pyglet.window.key.A:
+			self.world.player.input[0] -= 1
+		elif key == pyglet.window.key.W:
+			self.world.player.input[2] += 1
+		elif key == pyglet.window.key.S:
+			self.world.player.input[2] -= 1
 
-		elif key == pyglet.window.key.SPACE : self.world.player.input[1] += 1
-		elif key == pyglet.window.key.LSHIFT: self.world.player.input[1] -= 1
-		elif key == pyglet.window.key.LCTRL : self.world.player.target_speed = player.SPRINTING_SPEED
+		elif key == pyglet.window.key.SPACE:
+			self.world.player.input[1] += 1
+		elif key == pyglet.window.key.LSHIFT:
+			self.world.player.input[1] -= 1
+		elif key == pyglet.window.key.LCTRL:
+			self.world.player.target_speed = player.SPRINTING_SPEED
 
 		elif key == pyglet.window.key.F:
 			self.world.player.flying = not self.world.player.flying
@@ -177,22 +187,33 @@ class Window(pyglet.window.Window):
 		if not self.mouse_captured:
 			return
 
-		if   key == pyglet.window.key.D: self.world.player.input[0] -= 1
-		elif key == pyglet.window.key.A: self.world.player.input[0] += 1
-		elif key == pyglet.window.key.W: self.world.player.input[2] -= 1
-		elif key == pyglet.window.key.S: self.world.player.input[2] += 1
+		if key == pyglet.window.key.D:
+			self.world.player.input[0] -= 1
+		elif key == pyglet.window.key.A:
+			self.world.player.input[0] += 1
+		elif key == pyglet.window.key.W:
+			self.world.player.input[2] -= 1
+		elif key == pyglet.window.key.S:
+			self.world.player.input[2] += 1
 
-		elif key == pyglet.window.key.SPACE : self.world.player.input[1] -= 1
-		elif key == pyglet.window.key.LSHIFT: self.world.player.input[1] += 1
-		elif key == pyglet.window.key.LCTRL : self.world.player.target_speed = player.WALKING_SPEED
+		elif key == pyglet.window.key.SPACE:
+			self.world.player.input[1] -= 1
+		elif key == pyglet.window.key.LSHIFT:
+			self.world.player.input[1] += 1
+		elif key == pyglet.window.key.LCTRL:
+			self.world.player.target_speed = player.WALKING_SPEED
+
 
 class Game:
 	def __init__(self):
-		self.config = gl.Config(major_version = 3, minor_version = 3, depth_size = 16)
-		self.window = Window(config = self.config, width = 800, height = 600, caption = "Minecraft clone", resizable = True, vsync = False)
+		self.config = gl.Config(major_version=3, minor_version=3, depth_size=16)
+		self.window = Window(
+			config=self.config, width=800, height=600, caption="Minecraft clone", resizable=True, vsync=False
+		)
 
 	def run(self):
 		pyglet.app.run()
+
 
 import cProfile
 
