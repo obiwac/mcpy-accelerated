@@ -11,13 +11,13 @@ jobs:
         with:
           python-version: "3.11"
       - uses: abatilo/actions-poetry@v2
+      - name: Install dependencies
+        run: poetry install --no-root --with dev
       - name: Cache venv created by poetry (configured to be in '.venv')
         uses: actions/cache@v3
         with:
           path: ./.venv
           key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
-      - name: Install dependencies
-        run: poetry install --no-root --with dev
       - name: Run formatter
         run: |
           poetry run tan --check . --use-tabs --line-length 120 --verbose
