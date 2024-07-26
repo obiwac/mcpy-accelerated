@@ -31,4 +31,4 @@ __all__ = [
 	"curry",
 ]
 
-from . import *
+from models import *

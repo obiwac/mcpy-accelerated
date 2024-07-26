@@ -3,8 +3,8 @@ import base36
 import pickle
 import gzip
 
-import chunk
-import mob
+from src.chunk.chunk import Chunk, CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_LENGTH
+from src.entity.mob import Mob
 
 
 class Save:
@@ -49,7 +49,7 @@ class Save:
 
 		# create chunk and fill it with the blocks from our chunk file
 
-		self.world.chunks[chunk_position] = chunk.Chunk(self.world, chunk_position)
+		self.world.chunks[chunk_position] = Chunk(self.world, chunk_position)
 		self.world.chunks[chunk_position].copy_blocks(blocks)
 
 		# load entities from chunk
@@ -60,7 +60,7 @@ class Save:
 			if name not in self.world.entity_types:
 				continue
 
-			mob_ = mob.Mob(self.world, self.world.entity_types[name])
+			mob_ = Mob(self.world, self.world.entity_types[name])
 			(*mob_.position,) = entity["Pos"]
 
 			print(name, mob_.position)
@@ -86,13 +86,13 @@ class Save:
 
 		# fill the chunk file with the blocks from our chunk
 
-		chunk_blocks = nbt.ByteArray([0] * (chunk.CHUNK_WIDTH * chunk.CHUNK_HEIGHT * chunk.CHUNK_LENGTH))
+		chunk_blocks = nbt.ByteArray([0] * (CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LENGTH))
 
-		for x in range(chunk.CHUNK_WIDTH):
-			for y in range(chunk.CHUNK_HEIGHT):
-				for z in range(chunk.CHUNK_LENGTH):
+		for x in range(CHUNK_WIDTH):
+			for y in range(CHUNK_HEIGHT):
+				for z in range(CHUNK_LENGTH):
 					chunk_blocks[
-						x * chunk.CHUNK_LENGTH * chunk.CHUNK_HEIGHT + z * chunk.CHUNK_HEIGHT + y
+						x * CHUNK_LENGTH * CHUNK_HEIGHT + z * CHUNK_HEIGHT + y
 					] = self.world.chunks[
 						chunk_position
 					].blocks[x][y][z]

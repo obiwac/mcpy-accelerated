@@ -1,13 +1,13 @@
 import math
 import glm
 
-import entity
+from src.entity.entity import Entity
 
 WALKING_SPEED = 4.317
 SPRINTING_SPEED = 7  # faster than in Minecraft, feels better
 
 
-class Player(entity.Entity):
+class Player(Entity):
 	def __init__(self, world, width, height):
 		super().__init__(world, world.entity_types["Player"])
 

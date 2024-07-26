@@ -1,10 +1,10 @@
 import random
 import math
 
-import entity
+from src.entity.entity import Entity
 
 
-class Mob(entity.Entity):
+class Mob(Entity):
 	def __init__(self, world, entity_type):
 		super().__init__(world, entity_type)
 

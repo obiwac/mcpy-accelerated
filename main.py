@@ -2,17 +2,17 @@ import math
 import random
 import pyglet
 
-pyglet.options["shadow_window"] = False
-pyglet.options["debug_gl"] = False
+pyglet.options["shadow_window"] = False # pyright: ignore
+pyglet.options["debug_gl"] = False # pyright: ignore
 
 import pyglet.gl as gl
 
-import mob
-import player
-import world
-import hit
+import src.entity.mob as mob
+import src.entity.player as player
+import src.world as world
+import src.physics.hit as hit
 
-from chunk_common import CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_LENGTH
+from src.chunk.chunk_common import CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_LENGTH
 
 
 class Window(pyglet.window.Window):

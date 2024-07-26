@@ -1,18 +1,18 @@
 import math
 import glm
 
-import save
-import chunk
-import shader
+import src.save as save
+import src.chunk.chunk as chunk
+from src.renderer.shader import Shader
 
-import block_type
-import texture_manager
+from src.renderer.block_type import Block_type
+from src.renderer.texture_manager import Texture_manager
 
-import player
+from src.entity.player import Player
 
 import pyglet.gl as gl
 
-import entity_type
+import entity_type as entity_type
 
 # import custom block models
 
@@ -21,7 +21,7 @@ import models
 
 class World:
 	def __init__(self, width, height):
-		self.texture_manager = texture_manager.Texture_manager(16, 16, 256)
+		self.texture_manager = Texture_manager(16, 16, 256)
 		self.block_types = [None]
 
 		self.entity_types = {}
@@ -69,7 +69,7 @@ class World:
 
 			# add block type
 
-			_block_type = block_type.Block_type(self.texture_manager, name, texture, model)
+			_block_type = Block_type(self.texture_manager, name, texture, model)
 
 			if number < len(self.block_types):
 				self.block_types[number] = _block_type
@@ -128,11 +128,11 @@ class World:
 
 		# shaders
 
-		self.block_shader = shader.Shader("shaders/block/vert.glsl", "shaders/block/frag.glsl")
+		self.block_shader = Shader("shaders/block/vert.glsl", "shaders/block/frag.glsl")
 		self.block_shader_sampler_location = self.block_shader.find_uniform(b"texture_array_sampler")
 		self.block_shader_matrix_location = self.block_shader.find_uniform(b"matrix")
 
-		self.entity_shader = shader.Shader("shaders/entity/vert.glsl", "shaders/entity/frag.glsl")
+		self.entity_shader = Shader("shaders/entity/vert.glsl", "shaders/entity/frag.glsl")
 		self.entity_shader_sampler_location = self.entity_shader.find_uniform(b"texture_sampler")
 		self.entity_shader_inverse_transform_matrix_location = self.entity_shader.find_uniform(
 			b"inverse_transform_matrix"
@@ -149,7 +149,7 @@ class World:
 
 		# create player
 
-		self.player = player.Player(self, width, height)
+		self.player = Player(self, width, height)
 
 	def get_chunk_position(self, position):
 		x, y, z = position

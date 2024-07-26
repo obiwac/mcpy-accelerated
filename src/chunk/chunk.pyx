@@ -6,13 +6,13 @@ import pyglet.gl as gl
 
 from libc.stdlib cimport malloc, free
 from libc.stdint cimport uint8_t
-from chunk_common cimport CChunk, CSubchunk
-from chunk_common import CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_LENGTH
-from chunk_common import SUBCHUNK_WIDTH, SUBCHUNK_HEIGHT, SUBCHUNK_LENGTH
+from src.chunk.chunk_common cimport CChunk, CSubchunk
+from src.chunk.chunk_common import CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_LENGTH
+from src.chunk.chunk_common import SUBCHUNK_WIDTH, SUBCHUNK_HEIGHT, SUBCHUNK_LENGTH
 
 # define these first because subchunk depends on them
 
-import subchunk
+import src.chunk.subchunk as subchunk
 
 cdef send_mesh_data_to_gpu(self): # pass mesh data to gpu
 	cdef CChunk c = self.c

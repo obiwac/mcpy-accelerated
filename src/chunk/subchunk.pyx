@@ -1,7 +1,7 @@
-import chunk
-from chunk_common cimport CChunk, CSubchunk
-from chunk_common cimport C_CHUNK_WIDTH, C_CHUNK_HEIGHT, C_CHUNK_LENGTH
-from chunk_common cimport C_SUBCHUNK_WIDTH, C_SUBCHUNK_HEIGHT, C_SUBCHUNK_LENGTH
+import src.chunk.chunk as chunk
+from src.chunk.chunk_common cimport CChunk, CSubchunk
+from src.chunk.chunk_common cimport C_CHUNK_WIDTH, C_CHUNK_HEIGHT, C_CHUNK_LENGTH
+from src.chunk.chunk_common cimport C_SUBCHUNK_WIDTH, C_SUBCHUNK_HEIGHT, C_SUBCHUNK_LENGTH
 
 from libc.stdlib cimport malloc, realloc, free
 from libc.string cimport memcpy

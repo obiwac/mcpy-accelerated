@@ -2,10 +2,10 @@ import math
 import glm
 import random
 
-import collider
-import fast
+import src.physics.collider as collider
+import src.chunk.fast as fast
 
-import chunk
+import src.chunk.chunk as chunk
 
 FLYING_ACCEL  = (0,   0, 0)
 GRAVITY_ACCEL = (0, -32, 0)

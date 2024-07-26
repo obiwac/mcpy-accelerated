@@ -1,5 +1,5 @@
-from chunk_common cimport CChunk
-from chunk_common cimport C_CHUNK_WIDTH, C_CHUNK_HEIGHT, C_CHUNK_LENGTH
+from src.chunk.chunk_common cimport CChunk
+from src.chunk.chunk_common cimport C_CHUNK_WIDTH, C_CHUNK_HEIGHT, C_CHUNK_LENGTH
 
 def get_block_number(chunks, position):
 	x, y, z = position

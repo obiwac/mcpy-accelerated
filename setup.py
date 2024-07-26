@@ -6,7 +6,7 @@ Cython.Compiler.Options.cimport_from_pyx = True
 
 setup(
 	ext_modules=cythonize(
-		["fast.pyx", "entity.pyx", "collider.pyx", "entity_type.pyx", "chunk_common.pyx", "chunk.pyx", "subchunk.pyx"],
+		["src/chunk/fast.pyx", "src/entity/entity.pyx", "src/physics/collider.pyx", "src/entity/entity_type.pyx", "src/chunk/chunk_common.pyx", "src/chunk/chunk.pyx", "src/chunk/subchunk.pyx"],
 		compiler_directives={
 			"language_level": 3,
 			"profile": True,
