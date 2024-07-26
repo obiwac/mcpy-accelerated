@@ -1,4 +1,3 @@
-import ctypes
 import pyglet
 
 import pyglet.gl as gl
@@ -40,7 +39,7 @@ class Texture_manager:
 	def add_texture(self, texture):
 		gl.glBindTexture(gl.GL_TEXTURE_2D_ARRAY, self.texture_array)
 
-		if not texture in self.textures:
+		if texture not in self.textures:
 			self.textures.append(texture)
 
 			texture_image = pyglet.image.load(f"textures/{texture}.png").get_image_data()
