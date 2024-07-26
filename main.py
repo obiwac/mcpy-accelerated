@@ -1,10 +1,8 @@
 import math
 import random
+import cProfile
+
 import pyglet
-
-pyglet.options["shadow_window"] = False # pyright: ignore
-pyglet.options["debug_gl"] = False # pyright: ignore
-
 import pyglet.gl as gl
 
 import src.entity.mob as mob
@@ -214,8 +212,6 @@ class Game:
 	def run(self):
 		pyglet.app.run()
 
-
-import cProfile
 
 if __name__ == "__main__":
 	with cProfile.Profile() as profiler:
