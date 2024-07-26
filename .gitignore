@@ -9,3 +9,4 @@ build
 *.core
 *.prof
 *.egg-info
+dist
