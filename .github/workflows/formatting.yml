@@ -20,7 +20,7 @@ jobs:
         run: poetry install --no-root --with dev
       - name: Run formatter
         run: |
-          poetry run tan --check . --line-length 120 --verbose
+          poetry run tan --check . --use-tabs --line-length 120 --verbose
       - name: Run Linter
         run: |
           poetry run ruff check .
